@@ -101,20 +101,37 @@ int main( int argc, char **argv )
             break;  
     
 		//这里改成循环获取深度图/彩色图
-        //get data                             
-		stringstream ss; ss.clear(); ss << count; 
-		string rgbFile_address = "E:\\Code\\vs2010\\oni2picture_ed2\\oni2picture_ed2\\resultPicture\\c_color"+ss.str()+".png";
-		string depthFile_output_address = "E:\\Code\\vs2010\\oni2picture_ed2\\oni2picture_ed2\\resultPicture\\c_depth_output"+ss.str()+".png";
-		string depthFile_vis_address = "E:\\Code\\vs2010\\oni2picture_ed2\\oni2picture_ed2\\resultPicture\\c_depth_vis"+ss.str()+".png";
-		const char* c_rgb = rgbFile_address.c_str();
-		const char* c_depth_output = depthFile_output_address.c_str();
-		const char* c_depth_vis = depthFile_vis_address.c_str();
-		/* cvSaveImage(c_rgb, &(IplImage(cvBGRImg))); */
-		cvSaveImage(c_rgb, &(IplImage(cvRGBImg))); //输出RGB
-		cvSaveImage(c_depth_output, &(IplImage(cvDepthImg_output)));//每个像素点的深度值单位为mm
-		cvSaveImage(c_depth_vis, &(IplImage(cvDepthImg_vis)));//用于可视化
+        //get data    
+		const int saveFPS = 1;
+		if(count % saveFPS == 0){
+			stringstream ss; ss.clear(); ss << count/saveFPS; 
+			string rgbFile_address = "E:\\Code\\vs2010\\oni2picture_ed2\\oni2picture_ed2\\tankData\\background\\colormap\\color"+ss.str()+".png";
+			string depthFile_output_address = "E:\\Code\\vs2010\\oni2picture_ed2\\oni2picture_ed2\\tankData\\background\\depthmap\\depth_output"+ss.str()+".png";
+			string depthFile_vis_address = "E:\\Code\\vs2010\\oni2picture_ed2\\oni2picture_ed2\\tankData\\background\\depthmap\\depth_vis"+ss.str()+".png";
+
+			//string rgbFile_address = "E:\\Code\\vs2010\\oni2picture_ed2\\oni2picture_ed2\\tankData\\foreground\\colormap\\color"+ss.str()+".png";
+			//string depthFile_output_address = "E:\\Code\\vs2010\\oni2picture_ed2\\oni2picture_ed2\\tankData\\foreground\\depthmap\\depth_output"+ss.str()+".png";
+			//string depthFile_vis_address = "E:\\Code\\vs2010\\oni2picture_ed2\\oni2picture_ed2\\tankData\\foreground\\depthmap\\depth_vis"+ss.str()+".png";
+
+			/*string rgbFile_address = "E:\\Code\\vs2010\\oni2picture_ed2\\oni2picture_ed2\\tankData\\testData\\color"+ss.str()+".png";
+			string depthFile_output_address = "E:\\Code\\vs2010\\oni2picture_ed2\\oni2picture_ed2\\tankData\\testData\\depth_output"+ss.str()+".png";
+			string depthFile_vis_address = "E:\\Code\\vs2010\\oni2picture_ed2\\oni2picture_ed2\\tankData\\testData\\depth_vis"+ss.str()+".png";*/
+
+			const char* c_rgb = rgbFile_address.c_str();
+			const char* c_depth_output = depthFile_output_address.c_str();
+			const char* c_depth_vis = depthFile_vis_address.c_str();
+			/* cvSaveImage(c_rgb, &(IplImage(cvBGRImg))); */
+			cvSaveImage(c_rgb, &(IplImage(cvBGRImg))); //输出RGB
+			cvSaveImage(c_depth_output, &(IplImage(cvDepthImg_output)));//每个像素点的深度值单位为mm
+			//cvSaveImage(c_depth_vis, &(IplImage(cvDepthImg_vis)));//用于可视化
+		}
+
         count++;
-		if(count == 30) break;
+		if(count == 151) break;
+		
     } 
 
 }  
+
+
+
