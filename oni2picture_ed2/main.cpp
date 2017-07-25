@@ -77,7 +77,7 @@ int main( int argc, char **argv )
 	int count = 1;
     while(true)  
     {  
-		
+		device.setImageRegistrationMode(IMAGE_REGISTRATION_DEPTH_TO_COLOR);
         // read frame    
         if( oniColorStream.readFrame( &oniColorImg ) == STATUS_OK )    
         {    
@@ -109,13 +109,17 @@ int main( int argc, char **argv )
 			string depthFile_output_address = "E:\\Code\\vs2010\\oni2picture_ed2\\oni2picture_ed2\\tankData\\background\\depthmap\\depth_output"+ss.str()+".png";
 			string depthFile_vis_address = "E:\\Code\\vs2010\\oni2picture_ed2\\oni2picture_ed2\\tankData\\background\\depthmap\\depth_vis"+ss.str()+".png";
 
-			//string rgbFile_address = "E:\\Code\\vs2010\\oni2picture_ed2\\oni2picture_ed2\\tankData\\foreground\\colormap\\color"+ss.str()+".png";
-			//string depthFile_output_address = "E:\\Code\\vs2010\\oni2picture_ed2\\oni2picture_ed2\\tankData\\foreground\\depthmap\\depth_output"+ss.str()+".png";
-			//string depthFile_vis_address = "E:\\Code\\vs2010\\oni2picture_ed2\\oni2picture_ed2\\tankData\\foreground\\depthmap\\depth_vis"+ss.str()+".png";
+			/*string rgbFile_address = "E:\\Code\\vs2010\\oni2picture_ed2\\oni2picture_ed2\\tankData\\foreground\\colormap\\color"+ss.str()+".png";
+			string depthFile_output_address = "E:\\Code\\vs2010\\oni2picture_ed2\\oni2picture_ed2\\tankData\\foreground\\depthmap\\depth_output"+ss.str()+".png";
+			string depthFile_vis_address = "E:\\Code\\vs2010\\oni2picture_ed2\\oni2picture_ed2\\tankData\\foreground\\depthmap\\depth_vis"+ss.str()+".png";*/
 
 			/*string rgbFile_address = "E:\\Code\\vs2010\\oni2picture_ed2\\oni2picture_ed2\\tankData\\testData\\color"+ss.str()+".png";
 			string depthFile_output_address = "E:\\Code\\vs2010\\oni2picture_ed2\\oni2picture_ed2\\tankData\\testData\\depth_output"+ss.str()+".png";
 			string depthFile_vis_address = "E:\\Code\\vs2010\\oni2picture_ed2\\oni2picture_ed2\\tankData\\testData\\depth_vis"+ss.str()+".png";*/
+
+			//string rgbFile_address = "E:\\Code\\vs2010\\oni2picture_ed2\\oni2picture_ed2\\testRegistration\\afterReg\\color"+ss.str()+".png";
+			//string depthFile_output_address = "E:\\Code\\vs2010\\oni2picture_ed2\\oni2picture_ed2\\testRegistration\\afterReg\\depth_output"+ss.str()+".png";
+			//string depthFile_vis_address = "E:\\Code\\vs2010\\oni2picture_ed2\\oni2picture_ed2\\testRegistration\\afterReg\\depth_vis"+ss.str()+".png";
 
 			const char* c_rgb = rgbFile_address.c_str();
 			const char* c_depth_output = depthFile_output_address.c_str();

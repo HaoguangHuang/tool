@@ -10,8 +10,8 @@ fusionedBackgroundData = {};
 fusionedForegroundData = {};
 extractedTankData = {};
 
-module1 = 1; %fusion background
-module2 = 1; %fusion foreground
+module1 = 0; %fusion background
+module2 = 0; %fusion foreground
 module3 = 1; %extract tank in foreground
 
 if module1 ==1 
