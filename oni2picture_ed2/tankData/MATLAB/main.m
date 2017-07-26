@@ -1,4 +1,5 @@
-%% 提取前景的tank
+%% 提取depthMap前景的tank
+clear all; close all;
 backgroundFile = 'E:\Code\vs2010\oni2picture_ed2\oni2picture_ed2\tankData\background\depthmap\';
 foregroundFile = 'E:\Code\vs2010\oni2picture_ed2\oni2picture_ed2\tankData\foreground\depthmap\';
 fusionBackgroundFraNum = 100; %融合背景的帧数
