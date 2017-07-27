@@ -32,8 +32,8 @@ int main( int argc, char **argv )
     VideoFrameRef oniDepthImg;    
     VideoFrameRef oniColorImg;  
   
-    namedWindow("depth");    
-    namedWindow("image");   
+    namedWindow("1",CV_WINDOW_AUTOSIZE);    
+    namedWindow("2",CV_WINDOW_AUTOSIZE);   
   
     // 初始化OpenNI    
     result = OpenNI::initialize();  
@@ -51,8 +51,8 @@ int main( int argc, char **argv )
     
     // set depth video mode    
     VideoMode modeDepth;    
-    modeDepth.setResolution( 640, 480 );    
-    modeDepth.setFps( 30 );    
+    modeDepth.setResolution( 640, 480 ); 
+    modeDepth.setFps( 15 );    
     modeDepth.setPixelFormat( PIXEL_FORMAT_DEPTH_1_MM );    
     oniDepthStream.setVideoMode(modeDepth);    
     // start depth stream    
@@ -65,19 +65,20 @@ int main( int argc, char **argv )
     CheckOpenNIError( result, "create color stream" );  
     // set color video mode    
     VideoMode modeColor;    
-    modeColor.setResolution( 640, 480 );    
-    modeColor.setFps( 30 );    
+    modeColor.setResolution( 640, 480 ); 
+    modeColor.setFps( 15 );    
     modeColor.setPixelFormat( PIXEL_FORMAT_RGB888 );    
     oniColorStream.setVideoMode( modeColor);   
     // start color stream    
     result = oniColorStream.start();   
     CheckOpenNIError( result, "start color stream" );  
-  
+	device.setImageRegistrationMode(IMAGE_REGISTRATION_DEPTH_TO_COLOR);
+
 	//初始化完毕
 	int count = 1;
     while(true)  
     {  
-		device.setImageRegistrationMode(IMAGE_REGISTRATION_DEPTH_TO_COLOR);
+		
         // read frame    
         if( oniColorStream.readFrame( &oniColorImg ) == STATUS_OK )    
         {    
@@ -85,7 +86,7 @@ int main( int argc, char **argv )
             Mat cvRGBImg_tmp( oniColorImg.getHeight(), oniColorImg.getWidth(), CV_8UC3, (void*)oniColorImg.getData() );
 			cvRGBImg = cvRGBImg_tmp;
             cvtColor( cvRGBImg_tmp, cvBGRImg, CV_RGB2BGR );    
-            //imshow( "image", cvBGRImg );//cv的彩色图是BGR格式 
+            imshow( "2", cvBGRImg );//cv的彩色图是BGR格式 
         }    
   
         if( oniDepthStream.readFrame( &oniDepthImg ) == STATUS_OK )    
@@ -94,15 +95,17 @@ int main( int argc, char **argv )
             /*cvRawImg16U.convertTo( cvDepthImg, CV_8U, 255.0/(oniDepthStream.getMaxPixelValue()));*/
 			cvRawImg16U.convertTo( cvDepthImg_output, CV_16U );//CV_16U，刚好把65536mm内的深度值表示出来，输出到png图
 			cvRawImg16U.convertTo( cvDepthImg_vis, CV_8U, 255.0/(oniDepthStream.getMaxPixelValue()) );//CV_8U才能进行visualization
-            imshow( "depth", cvDepthImg_vis );     //cvDepthImg是Mat格式
+            imshow( "1", cvDepthImg_vis );     //cvDepthImg是Mat格式
         }    
         // quit  
+
         if( cv::waitKey( 1 ) == 'q' )        
             break;  
     
 		//这里改成循环获取深度图/彩色图
         //get data    
 		const int saveFPS = 1;
+#if 0
 		if(count % saveFPS == 0){
 			stringstream ss; ss.clear(); ss << count/saveFPS; 
 			string rgbFile_address = "E:\\Code\\vs2010\\oni2picture_ed2\\oni2picture_ed2\\tankData\\background\\colormap\\color"+ss.str()+".png";
@@ -129,11 +132,19 @@ int main( int argc, char **argv )
 			cvSaveImage(c_depth_output, &(IplImage(cvDepthImg_output)));//每个像素点的深度值单位为mm
 			//cvSaveImage(c_depth_vis, &(IplImage(cvDepthImg_vis)));//用于可视化
 		}
-
+#endif
         count++;
-		if(count == 151) break;
+		if(count == 111301) break;
 		
     } 
+
+	//close video stream
+	oniDepthStream.destroy();
+	oniColorStream.destroy();
+
+	device.close();
+
+	openni::OpenNI::shutdown();
 
 }  
 
