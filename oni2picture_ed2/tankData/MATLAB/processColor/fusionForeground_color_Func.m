@@ -1,4 +1,4 @@
-%%隔fusionForegroundSeg帧采样
+%%隔fusionForegroundSeg帧采样，这里没有融合的操作
 function fusionedForegroundData = fusionForeground_color_Func(foregroundData, fusionForegroundSeg)
     frameNum = size(foregroundData, 2);
     if mod(frameNum, fusionForegroundSeg) ~=0

@@ -1,7 +1,7 @@
 %% 提取depthMap前景的tank
 clear all; close all;
-backgroundFile = 'E:\Code\vs2010\oni2picture_ed2\oni2picture_ed2\tankData\background\depthmap\';
-foregroundFile = 'E:\Code\vs2010\oni2picture_ed2\oni2picture_ed2\tankData\foreground\depthmap\';
+backgroundFile = 'E:\dataSet\set4\background\';
+foregroundFile = 'E:\dataSet\set4\foreground\';
 fusionBackgroundFraNum = 100; %融合背景的帧数
 fusionForegroundSeg = 5; %前景中，每 x 帧融合得到新的深度图
 foregroundFraNum = 600;
@@ -11,8 +11,8 @@ fusionedBackgroundData = {};
 fusionedForegroundData = {};
 extractedTankData = {};
 
-module1 = 0; %fusion background
-module2 = 0; %fusion foreground
+module1 = 1; %fusion background
+module2 = 1; %fusion foreground
 module3 = 1; %extract tank in foreground
 
 if module1 ==1 
@@ -21,7 +21,7 @@ if module1 ==1
         backgroundData(i).data = imread([backgroundFile,'depth_output',int2str(i),'.png']);
     end
     fusionedBackgroundData = fusionBackgroundFunc(backgroundData);
-    imwrite(uint16(fusionedBackgroundData),'E:\Code\vs2010\oni2picture_ed2\oni2picture_ed2\tankData\processedData\fusionedBackgroundData\fusionedBackgroundData.png');
+    imwrite(uint16(fusionedBackgroundData),'E:\dataSet\set4\processedData\depth\fusionedBackgroundData\fusionedBackgroundData.png');
 end
 
 if module2 == 1
@@ -31,22 +31,22 @@ if module2 == 1
     fusionedForegroundData = fusionForegroundFunc(foregroundData, fusionForegroundSeg);
     %save fusionedForegroundData
     for i = 1:foregroundFraNum/fusionForegroundSeg
-        imwrite(uint16(fusionedForegroundData(i).data),['E:\Code\vs2010\oni2picture_ed2\oni2picture_ed2\tankData\processedData\fusionedForegroundData\fusionedForegroundData',int2str(i),'.png'])
+        imwrite(uint16(fusionedForegroundData(i).data),['E:\dataSet\set4\processedData\depth\fusionedForegroundData\fusionedForegroundData',int2str(i),'.png'])
     end
 end
 
 if module3 == 1
     if(module1 == 0) 
-        fusionedBackgroundData = imread('E:\Code\vs2010\oni2picture_ed2\oni2picture_ed2\tankData\processedData\fusionedBackgroundData\fusionedBackgroundData.png');
+        fusionedBackgroundData = imread('E:\dataSet\set4\processedData\depth\fusionedBackgroundData\fusionedBackgroundData.png');
     end
     if(module2 == 0)
         for i = 1:foregroundFraNum/fusionForegroundSeg
-            fusionedForegroundData(i).data = imread(['E:\Code\vs2010\oni2picture_ed2\oni2picture_ed2\tankData\processedData\fusionedForegroundData\fusionedForegroundData',int2str(i),'.png']);
+            fusionedForegroundData(i).data = imread(['E:\dataSet\set4\processedData\depth\fusionedForegroundData\fusionedForegroundData',int2str(i),'.png']);
         end
     end
     extractedTankData = extractTankFunc(fusionedBackgroundData, fusionedForegroundData);
     %save extractedTankData
     for i = 1:foregroundFraNum/fusionForegroundSeg
-        imwrite(uint16(extractedTankData(i).data), ['E:\Code\vs2010\oni2picture_ed2\oni2picture_ed2\tankData\processedData\extractedTankData\extractedTankData',int2str(i),'.png']);
+        imwrite(uint16(extractedTankData(i).data), ['E:\dataSet\set4\processedData\depth\extractedTankData\extractedTankData',int2str(i),'.png']);
     end
 end

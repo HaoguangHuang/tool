@@ -8,7 +8,8 @@ function extractedTankData = extractTank_color_Func(fusionedBackgroundData, fusi
     end
     
     %%ȡmask
-    for i = 1:frameNum
+    matlabpool 4;
+    parfor i = 1:frameNum
         R = fusionedForegroundData(i).data(:,:,1);
         G = fusionedForegroundData(i).data(:,:,2);
         B = fusionedForegroundData(i).data(:,:,3); 
@@ -22,6 +23,7 @@ function extractedTankData = extractTank_color_Func(fusionedBackgroundData, fusi
         extractedTankData(i).data(:,:,2) = G_new;
         extractedTankData(i).data(:,:,3) = B_new;
     end
+    matlabpool close;
 end
 
     
