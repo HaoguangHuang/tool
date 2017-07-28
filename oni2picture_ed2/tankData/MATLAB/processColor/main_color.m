@@ -1,10 +1,10 @@
 %% 提取colorMap的前景
 clear all; close all;
-backgroundFile = 'E:\dataSet\set8\background\';
-foregroundFile = 'E:\dataSet\set8\foreground\';
-extractedDepthFile = 'E:\dataSet\set8\processedData\depth\extractedTankData\';
+backgroundFile = 'E:\dataSet\set9\background\';
+foregroundFile = 'E:\dataSet\set9\foreground\';
+extractedDepthFile = 'E:\dataSet\set9\processedData\depth\extractedTankData\';
 fusionBackgroundFraNum = 1; %彩色图不需要背景融合
-fusionForegroundSeg = 15; %前景中，每 x 帧融合得到新的彩色图
+fusionForegroundSeg = 20; %前景中，每 x 帧融合得到新的彩色图
 foregroundFraNum = 2000;
 backgroundData = {}; %save raw data from background file
 foregroundData = {}; %save raw data from foreground file
@@ -24,7 +24,7 @@ if module1 ==1
     end
     %fusionedBackgroundData = fusionBackground_color_Func(backgroundData);
     fusionedBackgroundData = backgroundData(1).data;
-    imwrite(uint8(fusionedBackgroundData),'E:\dataSet\set8\processedData\color\fusionedBackgroundData\fusionedBackgroundData.png');
+    imwrite(uint8(fusionedBackgroundData),'E:\dataSet\set9\processedData\color\fusionedBackgroundData\fusionedBackgroundData.png');
 end
 
 if module2 == 1
@@ -37,17 +37,17 @@ if module2 == 1
     
     %%save fusionedForegroundData
     for i = 1:foregroundFraNum/fusionForegroundSeg
-        imwrite(uint8(fusionedForegroundData(i).data),['E:\dataSet\set8\processedData\color\fusionedForegroundData\fusionedForegroundData',int2str(i),'.png'])
+        imwrite(uint8(fusionedForegroundData(i).data),['E:\dataSet\set9\processedData\color\fusionedForegroundData\fusionedForegroundData',int2str(i),'.png'])
     end
 end
 
 if module3 == 1
     if(module1 == 0) 
-        fusionedBackgroundData = imread('E:\dataSet\set8\processedData\color\fusionedBackgroundData\fusionedBackgroundData.png');
+        fusionedBackgroundData = imread('E:\dataSet\set9\processedData\color\fusionedBackgroundData\fusionedBackgroundData.png');
     end
     if(module2 == 0)
         for i = 1:foregroundFraNum/fusionForegroundSeg
-            fusionedForegroundData(i).data = imread(['E:\dataSet\set8\processedData\color\fusionedForegroundData\fusionedForegroundData',int2str(i),'.png']);
+            fusionedForegroundData(i).data = imread(['E:\dataSet\set9\processedData\color\fusionedForegroundData\fusionedForegroundData',int2str(i),'.png']);
         end
     end
     
@@ -60,7 +60,7 @@ if module3 == 1
     
     %%save extractedTankData
     for i = 1:foregroundFraNum/fusionForegroundSeg
-        imwrite(uint8(extractedTankData(i).data), ['E:\dataSet\set8\processedData\color\extractedTankData\extractedTankData',int2str(i),'.png']);
+        imwrite(uint8(extractedTankData(i).data), ['E:\dataSet\set9\processedData\color\extractedTankData\extractedTankData',int2str(i),'.png']);
     end
 end
 
