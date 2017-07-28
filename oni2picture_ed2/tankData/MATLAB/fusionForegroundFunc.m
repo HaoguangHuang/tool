@@ -8,6 +8,8 @@ function fusionedForegroundData = fusionForegroundFunc(foregroundData, fusionFor
     unitNum = frameNum / fusionForegroundSeg;
     result = {};
     matlabpool 4;
+%     delete(gcp);
+%     parpool('local', 4);
     parfor j = 1:unitNum
         for u = 1:640
             for v = 1:480
@@ -26,6 +28,7 @@ function fusionedForegroundData = fusionForegroundFunc(foregroundData, fusionFor
             end
         end
     end
-    matlabpool close;
+     matlabpool close;
+%     delete(gcp);
     fusionedForegroundData = result;
 end

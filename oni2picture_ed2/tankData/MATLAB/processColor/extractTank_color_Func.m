@@ -8,12 +8,12 @@ function extractedTankData = extractTank_color_Func(fusionedBackgroundData, fusi
     end
     
     %%ȡmask
-    matlabpool 4;
-    parfor i = 1:frameNum
+%     matlabpool 4;
+    for i = 1:frameNum
         R = fusionedForegroundData(i).data(:,:,1);
         G = fusionedForegroundData(i).data(:,:,2);
         B = fusionedForegroundData(i).data(:,:,3); 
-        mask1 = (intensityBackground - intensityForeground(i).data) > thres;
+        mask1 = abs((intensityBackground - intensityForeground(i).data)) > thres;
 %         mask1 = ones(480,640)
         mask2 = extractedDepthMap(i).data > 0;
         R_new = R .* uint8(mask1) .* uint8(mask2);
@@ -23,7 +23,7 @@ function extractedTankData = extractTank_color_Func(fusionedBackgroundData, fusi
         extractedTankData(i).data(:,:,2) = G_new;
         extractedTankData(i).data(:,:,3) = B_new;
     end
-    matlabpool close;
+%     matlabpool close;
 end
 
     
