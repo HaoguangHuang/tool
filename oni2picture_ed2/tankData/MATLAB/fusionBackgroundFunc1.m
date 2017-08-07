@@ -1,23 +1,15 @@
 function fusionedBackgroundData = fusionBackgroundFunc1(backgroundData)
     frameNum = size(backgroundData, 2);
-    result = [];
-    %以像素为单位作处理
-    for u = 1:640
-        for v = 1:480
-            tmp = 0;
-            count = 0;
-            for i = 1:frameNum
-                if backgroundData(i).data(v,u)~=0
-                    tmp = tmp + backgroundData(i).data(v,u);
-                    count = count + 1;
-                end
-            end
-            if count == 0   %像素点深度值恒为0
-                result(v,u) = 0; continue;
-            else
-                result(v,u) = double(tmp)/count;
-            end
-        end
+    result = zeros(size(backgroundData(1).data));
+    count_map = zeros(size(result));
+    fusionedBackgroundData = zeros(size(result));
+    for i = 1:frameNum
+        Di = double(backgroundData(i).data);
+        nonzero_index = Di > 0;
+        result(nonzero_index) = result(nonzero_index) + Di(nonzero_index);
+        count_map = count_map + nonzero_index;
     end
-    fusionedBackgroundData = result;
+    nonzero_bg = count_map > 0;
+    fusionedBackgroundData(nonzero_bg) = result(nonzero_bg) ./ count_map(nonzero_bg);
 end
+    
