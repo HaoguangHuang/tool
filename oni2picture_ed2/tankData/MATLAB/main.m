@@ -1,26 +1,27 @@
 %% 提取depthMap前景的tank
-clear all; close all;
+% clear all; close all;
 backgroundFile = 'E:\dataSet\set9\background\';
 foregroundFile = 'E:\dataSet\set9\foreground\';
 fusionBackgroundFraNum = 100; %融合背景的帧数
 fusionForegroundSeg = 20; %前景中，每 x 帧融合得到新的深度图
-foregroundFraNum = 2000;
+foregroundFraNum = 20;
 backgroundData = {}; %save raw data from background file
 foregroundData = {}; %save raw data from foreground file
 fusionedBackgroundData = {};
 fusionedForegroundData = {};
 extractedTankData = {};
 
-module1 = 0; %fusion background
+module1 = 1; %fusion background
 module2 = 0; %fusion foreground
-module3 = 1; %extract tank in foreground
+module3 = 0; %extract tank in foreground
 
 if module1 ==1 
     %read backGround data
     for i = 1:fusionBackgroundFraNum
         backgroundData(i).data = imread([backgroundFile,'depth_output',int2str(i),'.png']);
     end
-    fusionedBackgroundData = fusionBackgroundFunc(backgroundData);
+%     fusionedBackgroundData = fusionBackgroundFunc(backgroundData);
+    fusionedBackgroundData = fusionBackgroundFunc1(backgroundData);
     imwrite(uint16(fusionedBackgroundData),'E:\dataSet\set9\processedData\depth\fusionedBackgroundData\fusionedBackgroundData.png');
 end
 
