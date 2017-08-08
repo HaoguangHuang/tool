@@ -10,6 +10,6 @@ function fusionedBackgroundData = fusionBackgroundFunc1(backgroundData)
         count_map = count_map + nonzero_index;
     end
     nonzero_bg = count_map > 0;
-    fusionedBackgroundData(nonzero_bg) = result(nonzero_bg) ./ count_map(nonzero_bg);
+    fusionedBackgroundData(nonzero_bg) = uint16(result(nonzero_bg) ./ count_map(nonzero_bg));
 end
     

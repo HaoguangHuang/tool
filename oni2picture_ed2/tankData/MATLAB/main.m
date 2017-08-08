@@ -4,15 +4,15 @@ backgroundFile = 'E:\dataSet\set9\background\';
 foregroundFile = 'E:\dataSet\set9\foreground\';
 fusionBackgroundFraNum = 100; %融合背景的帧数
 fusionForegroundSeg = 20; %前景中，每 x 帧融合得到新的深度图
-foregroundFraNum = 20;
+foregroundFraNum = 2000;
 backgroundData = {}; %save raw data from background file
 foregroundData = {}; %save raw data from foreground file
 fusionedBackgroundData = {};
 fusionedForegroundData = {};
 extractedTankData = {};
 
-module1 = 1; %fusion background
-module2 = 0; %fusion foreground
+module1 = 0; %fusion background
+module2 = 1; %fusion foreground
 module3 = 0; %extract tank in foreground
 
 if module1 ==1 
@@ -29,7 +29,8 @@ if module2 == 1
     for i = 1:foregroundFraNum
         foregroundData(i).data = imread([foregroundFile,'depth_output',int2str(i),'.png']);
     end
-    fusionedForegroundData = fusionForegroundFunc(foregroundData, fusionForegroundSeg);
+%     fusionedForegroundData = fusionForegroundFunc(foregroundData, fusionForegroundSeg);
+    fusionedForegroundData = fusionForegroundFunc1(foregroundData, fusionForegroundSeg);
     %save fusionedForegroundData
     for i = 1:foregroundFraNum/fusionForegroundSeg
         imwrite(uint16(fusionedForegroundData(i).data),['E:\dataSet\set9\processedData\depth\fusionedForegroundData\fusionedForegroundData',int2str(i),'.png'])
