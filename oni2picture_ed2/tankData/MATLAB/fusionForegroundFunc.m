@@ -13,10 +13,10 @@ function fusionedForegroundData = fusionForegroundFunc(foregroundData, fusionFor
     parfor j = 1:unitNum
         for u = 1:640
             for v = 1:480
-                tmp = 0; count = 0;
+                tmp = double(0); count = 0;
                 for i = (fusionForegroundSeg*(j - 1)+1):(fusionForegroundSeg*j)
                     if foregroundData(i).data(v,u)~=0
-                        tmp = tmp + foregroundData(i).data(v,u);
+                        tmp = tmp + double(foregroundData(i).data(v,u));
                         count = count + 1;
                     end
                 end
