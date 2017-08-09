@@ -23,7 +23,7 @@ function extractedTankData = extractTankFunc(fusionedBackgroundData, fusionedFor
         
         result(i).data = result(i).data .* uint16(mask3);
         %%×ª»¯µ½[0-255]
-         result(i).data = double(result(i).data) .* (255/10000);
+%          result(i).data = double(result(i).data) .* (255/10000);
         
     end
     extractedTankData = result;

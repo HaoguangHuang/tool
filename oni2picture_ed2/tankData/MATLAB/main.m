@@ -60,7 +60,7 @@ if module3 == 1
     %save extractedTankData
     for i = 1:foregroundFraNum/fusionForegroundSeg
 %         imwrite(uint8(extractedTankData(i).data), ['E:\dataSet\set9\processedData\depth\extractedTankData\extractedTankData',int2str(i),'.png']);
-    imwrite(uint8(extractedTankData(i).data), ['E:\dataSet\Wajueji_1\processedData\depth\extractedTankData\extractedTankData',int2str(k),'.png']);
+    imwrite(uint16(extractedTankData(i).data), ['E:\dataSet\Wajueji_1\processedData\depth\extractedTankData\extractedTankData',int2str(k),'.png']);
     end
 end
 
