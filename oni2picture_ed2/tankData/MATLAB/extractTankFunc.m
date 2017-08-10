@@ -1,12 +1,14 @@
 function extractedTankData = extractTankFunc(fusionedBackgroundData, fusionedForegroundData)
     fusionedForeFraNum = size(fusionedForegroundData, 2);
-    thres = 30;%mm
+    thres = 60;%mm
     result = {};
     %%Ç°¾°¼õ±³¾°
     for i = 1:fusionedForeFraNum
 %         judgeArr =  abs((uint16(fusionedBackgroundData) - (uint16(fusionedForegroundData(i).data))))>thres;
         mask1 =  (double(fusionedBackgroundData) - (double(fusionedForegroundData(i).data)))>thres;
-        mask2 = fusionedForegroundData(i).data < 2000;
+        
+        mask2 = fusionedForegroundData(i).data < 1000;
+%         mask2 = ones(size(mask1));
         
         %%before imerode and  imdilate
         figure, hold on;

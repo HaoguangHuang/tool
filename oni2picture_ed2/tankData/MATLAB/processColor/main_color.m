@@ -1,15 +1,15 @@
 %% 提取colorMap的前景
 clear all; close all;
-for k = 1:24
+for k = 1:200
 % backgroundFile = 'E:\dataSet\set9\background\';
-backgroundFile = 'E:\dataSet\Wajueji_1\background\';
+backgroundFile = 'E:\dataSet\Wajueji_2\background\';
 % foregroundFile = 'E:\dataSet\set9\foreground\';
-foregroundFile = ['E:\dataSet\Wajueji_1\foreground',int2str(k),'\'];
+foregroundFile = ['E:\dataSet\Wajueji_2\foreground',int2str(k)];
 % extractedDepthFile = 'E:\dataSet\set9\processedData\depth\extractedTankData\';
-extractedDepthFile = 'E:\dataSet\Wajueji_1\processedData\depth\extractedTankData\';
+extractedDepthFile = 'E:\dataSet\Wajueji_2\processedData\depth\extractedTankData\';
 fusionBackgroundFraNum = 1; %彩色图不需要背景融合
-fusionForegroundSeg = 100; %前景中，每 x 帧融合得到新的彩色图
-foregroundFraNum = 100;
+fusionForegroundSeg = 50; %前景中，每 x 帧融合得到新的彩色图
+foregroundFraNum = 50;
 backgroundData = {}; %save raw data from background file
 foregroundData = {}; %save raw data from foreground file
 fusionedBackgroundData = {};
@@ -28,7 +28,7 @@ if module1 ==1
     %fusionedBackgroundData = fusionBackground_color_Func(backgroundData);
     fusionedBackgroundData = backgroundData(1).data;
 %     imwrite(uint8(fusionedBackgroundData),'E:\dataSet\set9\processedData\color\fusionedBackgroundData\fusionedBackgroundData.png');
-    imwrite(uint8(fusionedBackgroundData),'E:\dataSet\Wajueji_1\processedData\color\fusionedBackgroundData\fusionedBackgroundData.png');
+    imwrite(uint8(fusionedBackgroundData),'E:\dataSet\Wajueji_2\processedData\color\fusionedBackgroundData\fusionedBackgroundData.png');
 end
 
 if module2 == 1
@@ -43,19 +43,19 @@ if module2 == 1
     %%save fusionedForegroundData
     for i = 1:foregroundFraNum/fusionForegroundSeg
 %         imwrite(uint8(fusionedForegroundData(i).data),['E:\dataSet\set9\processedData\color\fusionedForegroundData\fusionedForegroundData',int2str(i),'.png'])
-        imwrite(uint8(fusionedForegroundData(i).data),['E:\dataSet\Wajueji_1\processedData\color\fusionedForegroundData\fusionedForegroundData',int2str(k),'.png'])
+        imwrite(uint8(fusionedForegroundData(i).data),['E:\dataSet\Wajueji_2\processedData\color\fusionedForegroundData\fusionedForegroundData',int2str(k),'.png'])
     end
 end
 
 if module3 == 1
     if(module1 == 0) 
 %         fusionedBackgroundData = imread('E:\dataSet\set9\processedData\color\fusionedBackgroundData\fusionedBackgroundData.png');
-        fusionedBackgroundData = imread('E:\dataSet\Wajueji_1\processedData\color\fusionedBackgroundData\fusionedBackgroundData.png');
+        fusionedBackgroundData = imread('E:\dataSet\Wajueji_2\processedData\color\fusionedBackgroundData\fusionedBackgroundData.png');
     end
     if(module2 == 0)
         for i = 1:foregroundFraNum/fusionForegroundSeg
 %             fusionedForegroundData(i).data = imread(['E:\dataSet\set9\processedData\color\fusionedForegroundData\fusionedForegroundData',int2str(i),'.png']);
-            fusionedForegroundData(i).data = imread(['E:\dataSet\Wajueji_1\processedData\color\fusionedForegroundData\fusionedForegroundData',int2str(k),'.png']);
+            fusionedForegroundData(i).data = imread(['E:\dataSet\Wajueji_2\processedData\color\fusionedForegroundData\fusionedForegroundData',int2str(k),'.png']);
         end
     end
     
@@ -70,7 +70,7 @@ if module3 == 1
     %%save extractedTankData
     for i = 1:foregroundFraNum/fusionForegroundSeg
 %         imwrite(uint8(extractedTankData(i).data), ['E:\dataSet\set9\processedData\color\extractedTankData\extractedTankData',int2str(i),'.png']);
-        imwrite(uint8(extractedTankData(i).data), ['E:\dataSet\Wajueji_1\processedData\color\extractedTankData\extractedTankData',int2str(k),'.png']);
+        imwrite(uint8(extractedTankData(i).data), ['E:\dataSet\Wajueji_2\processedData\color\extractedTankData\extractedTankData',int2str(k),'.png']);
     end
 end
 

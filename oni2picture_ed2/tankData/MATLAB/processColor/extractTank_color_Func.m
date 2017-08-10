@@ -15,8 +15,13 @@ function extractedTankData = extractTank_color_Func(fusionedBackgroundData, fusi
         B = fusionedForegroundData(i).data(:,:,3); 
         mask1 = abs((double(intensityBackground) - double(intensityForeground(i).data))) > thres;
 %         mask1 = ones(480,640);
+    %%¶Ômask1ÅòÕÍ¸¯Ê´
+%         se = strel('rectangle', [5 5]);
+%         mask1 = imdilate(mask1, se);
+%         mask1 = imerode(mask1, se);      
+       
         mask2 = extractedDepthMap(i).data > 0;
-%         mask2 = ones(480,640);
+%          mask2 = ones(480,640);
         R_new = R .* uint8(mask1) .* uint8(mask2);
         G_new = G .* uint8(mask1) .* uint8(mask2);
         B_new = B .* uint8(mask1) .* uint8(mask2);
