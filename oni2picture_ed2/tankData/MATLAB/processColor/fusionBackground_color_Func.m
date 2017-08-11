@@ -31,7 +31,7 @@ function fusionedBackgroundData = fusionBackground_color_Func(backgroundData)
     fusionedBackgroundData_cb(nonzero_bg) = background(nonzero_bg) ./ count_map(nonzero_bg);
     fusionedBackgroundData(:,:,2) = fusionedBackgroundData_cb;
     
-    %%channel cr
+    %% channel cr
     background = zeros(480,640);
     count_map = zeros(size(background));
     for i = 1:frameNum

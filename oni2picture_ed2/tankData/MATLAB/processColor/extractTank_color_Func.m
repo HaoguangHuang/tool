@@ -1,14 +1,15 @@
+%% processing rgb
 function extractedTankData = extractTank_color_Func(fusionedBackgroundData, fusionedForegroundData, extractedDepthMap)
     thres = 10;
     frameNum = size(fusionedForegroundData,2);
 
-    intensityBackground = transfromRGB2Intensity(fusionedBackgroundData);
+     intensityBackground = transfromRGB2Intensity(fusionedBackgroundData);
+
     for i = 1:frameNum
         intensityForeground(i).data = transfromRGB2Intensity(fusionedForegroundData(i).data);
     end
     
     %%ȡmask
-%     matlabpool 4;
     for i = 1:frameNum
         R = fusionedForegroundData(i).data(:,:,1);
         G = fusionedForegroundData(i).data(:,:,2);
@@ -29,7 +30,6 @@ function extractedTankData = extractTank_color_Func(fusionedBackgroundData, fusi
         extractedTankData(i).data(:,:,2) = G_new;
         extractedTankData(i).data(:,:,3) = B_new;
     end
-%     matlabpool close;
 end
 
     
