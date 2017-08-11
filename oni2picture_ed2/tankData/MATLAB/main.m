@@ -1,5 +1,5 @@
 %% 提取depthMap前景的tank
-clear all; close all;
+% clear all; close all;
 
 backgroundFile = 'E:\dataSet\Wajueji_2\background\';
 fusionBackgroundFraNum = 100; %融合背景的帧数
@@ -11,8 +11,8 @@ fusionedBackgroundData = {};
 fusionedForegroundData = {};
 extractedTankData = {};
 
-module1 = 1; %fusion background
-module2 = 1; %fusion foreground
+module1 = 0; %fusion background
+module2 = 0; %fusion foreground
 module3 = 1; %extract tank in foreground
 
 if module1 ==1 

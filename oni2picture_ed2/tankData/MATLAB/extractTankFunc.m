@@ -13,6 +13,9 @@ function extractedTankData = extractTankFunc(fusionedBackgroundData, fusionedFor
 %%guided bilateral filter
         mask_1_2 = mask1 .* mask2;
         mask_gbf = guidedBilateralFilter(mask_1_2, fusionedBackgroundData);%≤π∂¥
+        figure, imshow(mask_gbf,[]),title('mask_gbf = processed(mask_1_2)');
+        figure, imshow(mask_1_2, []),tilte('mask_1_2');
+        
         result(i).data = uint16(fusionedForegroundData(i).data) .* uint16(mask_gbf);
         
 %%∏Ø ¥≈Ú’Õ¥¶¿Ì
