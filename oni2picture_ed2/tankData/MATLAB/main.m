@@ -11,8 +11,8 @@ fusionedBackgroundData = {};
 fusionedForegroundData = {};
 extractedTankData = {};
 
-module1 = 0; %fusion background
-module2 = 0; %fusion foreground
+module1 = 1; %fusion background
+module2 = 1; %fusion foreground
 module3 = 1; %extract tank in foreground
 
 if module1 ==1 
@@ -25,7 +25,7 @@ if module1 ==1
     imwrite(uint16(fusionedBackgroundData),'E:\dataSet\Wajueji_2\processedData\depth\fusionedBackgroundData\fusionedBackgroundData.png');
 end
 
-for k = 1:200
+for k = 1:20
 foregroundFile = ['E:\dataSet\Wajueji_2\foreground',int2str(k)];
 if module2 == 1
     for i = 1:foregroundFraNum
@@ -34,7 +34,7 @@ if module2 == 1
     fusionedForegroundData = fusionForegroundFunc1(foregroundData, fusionForegroundSeg);
     %%save fusionedForegroundData
     for i = 1:foregroundFraNum/fusionForegroundSeg
-        imwrite(uint16(fusionedForegroundData(i).data),['E:\dataSet\Wajueji_2\processedData\depth\fusionedForegroundData\fusionedForegroundData',int2str(i),'.png'])
+        imwrite(uint16(fusionedForegroundData(i).data),['E:\dataSet\Wajueji_2\processedData\depth\fusionedForegroundData\fusionedForegroundData',int2str(k),'.png'])
     end
 end
  
@@ -44,13 +44,13 @@ if module3 == 1
     end
     if(module2 == 0)
         for i = 1:foregroundFraNum/fusionForegroundSeg
-            fusionedForegroundData(i).data = imread(['E:\dataSet\Wajueji_2\processedData\depth\fusionedForegroundData\fusionedForegroundData',int2str(i),'.png']);
+            fusionedForegroundData(i).data = imread(['E:\dataSet\Wajueji_2\processedData\depth\fusionedForegroundData\fusionedForegroundData',int2str(k),'.png']);
         end
     end
     extractedTankData = extractTankFunc(fusionedBackgroundData, fusionedForegroundData);
     %save extractedTankData
     for i = 1:foregroundFraNum/fusionForegroundSeg
-    imwrite(uint16(extractedTankData(i).data), ['E:\dataSet\Wajueji_2\processedData\depth\extractedTankData_fs2pz\extractedTankData',int2str(k),'.png']);
+    imwrite(uint16(extractedTankData(i).data), ['E:\dataSet\Wajueji_2\processedData\depth\extractedTankData\extractedTankData',int2str(k),'.png']);
     end
 end
 
