@@ -47,7 +47,10 @@ if module3 == 1
             fusionedForegroundData(i).data = imread(['E:\dataSet\Wajueji_2\processedData\depth\fusionedForegroundData\fusionedForegroundData',int2str(k),'.png']);
         end
     end
-    extractedTankData = extractTankFunc(fusionedBackgroundData, fusionedForegroundData);
+    
+    ycbcr_mat = imread(['E:\dataSet\Wajueji_2\processedData\color\fusionedForegroundData\fusionedForegroundData',int2str(k),'.png']);
+    
+    extractedTankData = extractTankFunc(fusionedBackgroundData, fusionedForegroundData, ycbcr_mat);
     %save extractedTankData
     for i = 1:foregroundFraNum/fusionForegroundSeg
     imwrite(uint16(extractedTankData(i).data), ['E:\dataSet\Wajueji_2\processedData\depth\extractedTankData\extractedTankData',int2str(k),'.png']);

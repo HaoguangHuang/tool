@@ -9,4 +9,4 @@ oni2picture_ed2/tankData/MATLAB/processColor/*.m:extract object from colorMap by
 master: process data with rgb2intensity, but without subtracting fusioned color foreground from fusioned color background
 branch1: process data with rgb2ycbcr, with subtracting fusioned color foreground from fusioned color background
 branch1_1:add guided bilateral filter in branch1
-
+branch_ccy:branch of branch1_1. add guided_JBF

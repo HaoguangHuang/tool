@@ -1,4 +1,4 @@
-function extractedTankData = extractTankFunc(fusionedBackgroundData, fusionedForegroundData)
+function extractedTankData = extractTankFunc(fusionedBackgroundData, fusionedForegroundData,ycbcr_mat)
     fusionedForeFraNum = size(fusionedForegroundData, 2);
     thres = 60;%mm
     result = {};
@@ -12,7 +12,12 @@ function extractedTankData = extractTankFunc(fusionedBackgroundData, fusionedFor
 %         result(i).data = uint16(fusionedForegroundData(i).data) .* uint16(mask1) .* uint16(mask2);
 %%guided bilateral filter
         mask_1_2 = mask1 .* mask2;
-        mask_gbf = guidedBilateralFilter(mask_1_2, fusionedForegroundData(i).data);%²¹¶´
+%         mask_gbf = guidedBilateralFilter(mask_1_2, fusionedForegroundData(i).data);%²¹¶´
+%         mask_gbf = guided_JBF(mask_1_2, fusionedForegroundData(i).data);%²¹¶´
+        mask_1_2 = imerode(mask_1_2, strel('disk', 3));
+        mask_a = guided_JBF(mask_1_2, ycbcr_mat(:,:,1));%²¹¶´
+        mask_a = guided_JBF(mask_a, ycbcr_mat(:,:,1));%²¹¶´
+        mask_gbf = guided_JBF(mask_a, ycbcr_mat(:,:,1));%²¹¶´
         figure, imshow(mask_gbf,[]),title('mask_gbf = processed(mask_1_2)');
         figure, imshow(mask_1_2, []),title('mask_1_2');
         
