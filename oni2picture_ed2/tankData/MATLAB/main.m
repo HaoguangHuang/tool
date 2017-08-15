@@ -1,6 +1,5 @@
 %% 提取depthMap前景的tank
 % clear all; close all;
-
 backgroundFile = 'E:\dataSet\Wajueji_2\background\';
 fusionBackgroundFraNum = 100; %融合背景的帧数
 fusionForegroundSeg = 50; %前景中，每 x 帧融合得到新的深度图
@@ -11,7 +10,7 @@ fusionedBackgroundData = {};
 fusionedForegroundData = {};
 extractedTankData = {};
 
-module1 = 1; %fusion background
+module1 = 0; %fusion background
 module2 = 1; %fusion foreground
 module3 = 1; %extract tank in foreground
 
@@ -25,7 +24,7 @@ if module1 ==1
     imwrite(uint16(fusionedBackgroundData),'E:\dataSet\Wajueji_2\processedData\depth\fusionedBackgroundData\fusionedBackgroundData.png');
 end
 
-for k = 1:20
+for k = 1:200
 foregroundFile = ['E:\dataSet\Wajueji_2\foreground',int2str(k)];
 if module2 == 1
     for i = 1:foregroundFraNum
@@ -50,11 +49,12 @@ if module3 == 1
     
     ycbcr_mat = imread(['E:\dataSet\Wajueji_2\processedData\color\fusionedForegroundData\fusionedForegroundData',int2str(k),'.png']);
     
-    extractedTankData = extractTankFunc(fusionedBackgroundData, fusionedForegroundData, ycbcr_mat);
+    saveDepthMask(fusionedBackgroundData, fusionedForegroundData, k);
+%     extractedTankData = extractTankFunc(fusionedBackgroundData, fusionedForegroundData, ycbcr_mat, k);
     %save extractedTankData
-    for i = 1:foregroundFraNum/fusionForegroundSeg
-    imwrite(uint16(extractedTankData(i).data), ['E:\dataSet\Wajueji_2\processedData\depth\extractedTankData\extractedTankData',int2str(k),'.png']);
-    end
+%     for i = 1:foregroundFraNum/fusionForegroundSeg
+%     imwrite(uint16(extractedTankData(i).data), ['E:\dataSet\Wajueji_2\processedData\depth\extractedTankData\extractedTankData',int2str(k),'.png']);
+%     end
 end
 
 disp(['processing k=',int2str(k)]);

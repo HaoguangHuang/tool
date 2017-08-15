@@ -1,5 +1,5 @@
 %% 提取colorMap的前景
-clear all; close all;
+% clear all; close all;
 
 backgroundFile = 'E:\dataSet\Wajueji_2\ycbcr\background\';
 
@@ -30,7 +30,7 @@ if module1 ==1
     imwrite(uint8(fusionedBackgroundData),'E:\dataSet\Wajueji_2\processedData\color\fusionedBackgroundData\fusionedBackgroundData.png');
 end
 
-for k = 1:20%143
+for k = 1:200%143
 foregroundFile = ['E:\dataSet\Wajueji_2\ycbcr\ycbcr_foreground',int2str(k)];
 if module2 == 1
     for i = (foreground_start+1):foregroundFraNum
@@ -60,12 +60,11 @@ if module3 == 1
         extractedDepthMap(i).data = imread([extractedDepthFile,'extractedTankData',int2str(k),'.png']);
     end
     
-%     extractedTankData = extractTank_color_Func(fusionedBackgroundData, fusionedForegroundData, extractedDepthMap);
-     extractedTankData = extractTank_color_ycbcr_Func(fusionedBackgroundData, fusionedForegroundData, extractedDepthMap);
+%      saveColorMask(fusionedBackgroundData, fusionedForegroundData, k);
+     extractedTankData = extractTank_color_ycbcr_Func(fusionedBackgroundData, fusionedForegroundData, extractedDepthMap, k);
     
     %%save extractedTankData
     for i = 1:foregroundFraNum/fusionForegroundSeg
-%         imwrite(uint8(extractedTankData(i).data), ['E:\dataSet\set9\processedData\color\extractedTankData\extractedTankData',int2str(i),'.png']);
         imwrite(uint8(extractedTankData(i).data), ['E:\dataSet\Wajueji_2\processedData\color\extractedTankData\extractedTankData',int2str(k),'.png']);
     end
 end
