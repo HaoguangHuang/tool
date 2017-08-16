@@ -49,12 +49,12 @@ if module3 == 1
     
     ycbcr_mat = imread(['E:\dataSet\Wajueji_2\processedData\color\fusionedForegroundData\fusionedForegroundData',int2str(k),'.png']);
     
-    saveDepthMask(fusionedBackgroundData, fusionedForegroundData, k);
-%     extractedTankData = extractTankFunc(fusionedBackgroundData, fusionedForegroundData, ycbcr_mat, k);
-    %save extractedTankData
-%     for i = 1:foregroundFraNum/fusionForegroundSeg
-%     imwrite(uint16(extractedTankData(i).data), ['E:\dataSet\Wajueji_2\processedData\depth\extractedTankData\extractedTankData',int2str(k),'.png']);
-%     end
+%     saveDepthMask(fusionedBackgroundData, fusionedForegroundData, k);
+    extractedTankData = extractTankFunc(fusionedBackgroundData, fusionedForegroundData, ycbcr_mat, k);
+ 
+    for i = 1:foregroundFraNum/fusionForegroundSeg
+    imwrite(uint16(extractedTankData(i).data), ['E:\dataSet\Wajueji_2\processedData\depth\extractedTankData\extractedTankData',int2str(k),'.png']);
+    end
 end
 
 disp(['processing k=',int2str(k)]);

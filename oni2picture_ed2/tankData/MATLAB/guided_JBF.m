@@ -1,8 +1,8 @@
 function [mask_gbf, count_o, weight_o]= guided_JBF(mask, I, is_ime, count_i, weight)
     I = double(I);
     [H, W]  =size(mask);  mask_gbf = zeros(H,W);
-    win_width = 5;%奇数容易分配num
-    win_height = 5; num_win = win_height*win_height;
+    win_width = 11;%奇数容易分配num
+    win_height = 11; num_win = win_height*win_height;
     half_w = (win_width-1)/2;
     sigma_c = 5;
     thres = 0.5;
@@ -28,7 +28,7 @@ function [mask_gbf, count_o, weight_o]= guided_JBF(mask, I, is_ime, count_i, wei
                 mask_gbf(r,c) = res_i;
             end
         end
-        figure(1), imshow(mat2gray(mask_gbf), 'border', 'tight'), title('grayscale result')
+%         figure(1), imshow(mat2gray(mask_gbf), 'border', 'tight'), title('grayscale result')
         mask_gbf = mask_gbf>thres;
         Res_I(:,:,1) = mask_gbf*255;
         Res_I(:,:,2) = I;

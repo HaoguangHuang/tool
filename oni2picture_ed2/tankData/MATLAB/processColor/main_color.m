@@ -30,7 +30,7 @@ if module1 ==1
     imwrite(uint8(fusionedBackgroundData),'E:\dataSet\Wajueji_2\processedData\color\fusionedBackgroundData\fusionedBackgroundData.png');
 end
 
-for k = 1:200%143
+for k = 23:200%143
 foregroundFile = ['E:\dataSet\Wajueji_2\ycbcr\ycbcr_foreground',int2str(k)];
 if module2 == 1
     for i = (foreground_start+1):foregroundFraNum

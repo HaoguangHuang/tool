@@ -9,7 +9,6 @@ function extractedTankData_c = extractTank_color_ycbcr_Func(fusionedBackgroundDa
 
         mask1 = abs(double(Y_bg) - double(Y_fg)) > thres;
         figure(888),imshow(mask1,[]),title(['thres = ',int2str(thres),',  color intensity substract']);
-        figure(123213),imshow(mask1_d,[]);
         mask1 = (mask1_d>0) .* mask1;
         figure(666),imshow(mask1,[]),title('mask1\_d .* mask1');
         
@@ -27,10 +26,10 @@ function extractedTankData_c = extractTank_color_ycbcr_Func(fusionedBackgroundDa
     %%guided膨胀
         weight_i = zeros(1,1);
         count = 0;%如果做膨胀后又做腐蚀，那count需要从0开始
-        [mask_1, ~,weight_o] = guided_JBF(mask1, Y_fg, 0,count, weight_i);%
-        [mask_1, ~,~] = guided_JBF(mask1, Y_fg, 0,count, weight_o);
-        [mask_1, ~,~] = guided_JBF(mask1, Y_fg, 0,count, weight_o);
-        [mask_1, ~,~] = guided_JBF(mask1, Y_fg, 0,count, weight_o);
+        [mask1, ~,weight_o] = guided_JBF(mask1, Y_fg, 0,count, weight_i);%
+        [mask1, ~,~] = guided_JBF(mask1, Y_fg, 0,count, weight_o);
+        [mask1, ~,~] = guided_JBF(mask1, Y_fg, 0,count, weight_o);
+        [mask1, ~,~] = guided_JBF(mask1, Y_fg, 0,count, weight_o);
         [mask_jbf_c, ~,~] = guided_JBF(mask1, Y_fg, 0,count, weight_o);
         
             
@@ -50,6 +49,6 @@ function extractedTankData_c = extractTank_color_ycbcr_Func(fusionedBackgroundDa
         extractedTankData_c(i).data(:,:,1) = uint8(fusionedForegroundData(:,:,1)) .* uint8(index1);
         extractedTankData_c(i).data(:,:,2) = uint8(fusionedForegroundData(:,:,2)) .* uint8(index1);
         extractedTankData_c(i).data(:,:,3) = uint8(fusionedForegroundData(:,:,3)) .* uint8(index1);
-        imwrite(uint8(index1),'E:\dataSet\Wajueji_2\processedData\finalMask\mask',int2str(k),'.png');
+        imwrite(uint8(index1),['E:\dataSet\Wajueji_2\processedData\finalMask\mask',int2str(k),'.png']);
     end
 end
