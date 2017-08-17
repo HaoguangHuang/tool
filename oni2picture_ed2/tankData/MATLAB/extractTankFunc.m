@@ -6,7 +6,7 @@ function extractedTankData = extractTankFunc(fusionedBackgroundData, fusionedFor
     
     for i = 1:fusionedForeFraNum
         mask1 =  (double(fusionedBackgroundData) - (double(fusionedForegroundData(i).data)))>thres;
-        mask2 = fusionedForegroundData(i).data < 1000;
+        mask2 = (fusionedForegroundData(i).data < 1300) .* (fusionedForegroundData(i).data > 0) ;
         mask1_c = imread(['E:\dataSet\Wajueji_2\processedData\c_Mask_4d\mask',int2str(k),'_c.png']);
         mask_1_2 = mask1 .* mask2;
         I(:,:,1) = mask_1_2*255;
@@ -44,11 +44,11 @@ function extractedTankData = extractTankFunc(fusionedBackgroundData, fusionedFor
             
         end
         mask_gbf_d = mask_1_2;
-        imwrite(uint8(mask_gbf_d), ['E:\dataSet\Wajueji_2\processedData\mask_d_c\mask',int2str(k),'_d_c.png']);
-        I(:,:,1) = mat2gray(mask_gbf_d)*255;
-        I(:,:,2) = fusionedForegroundData(i).data;
+        imwrite(uint8(mask_gbf_d), ['E:\dataSet\Wajueji_2\processedData\mask_d_c\mask',int2str(k),'_d_c_gd50gc50.png']);
+        I(:,:,1) = mask_gbf_d*255;
+        I(:,:,2) = ycbcr_mat(:,:,1);
         I(:,:,3) = zeros(size(mask_gbf_d));
-        imwrite(uint8(I), ['E:\dataSet\Wajueji_2\processedData\mask_d_c\vis_mask',int2str(k),'_d_c.png'])
+        imwrite(uint8(I), ['E:\dataSet\Wajueji_2\processedData\mask_d_c\vis\vis_mask',int2str(k),'_d_c_gd50gc50.png'])
         result(i).data = uint16(fusionedForegroundData(i).data) .* uint16(mask_gbf_d);
 
 %%×ª»¯µ½[0-255]

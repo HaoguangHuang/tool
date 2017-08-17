@@ -34,20 +34,14 @@ function extractedTankData_c = extractTank_color_ycbcr_Func(fusionedBackgroundDa
 %         I(:,:,2) = Y_bg;
 %         I(:,:,3) = zeros(size(Y_bg));
 %         figure(55),imshow(uint8(I));
-        
-        
+     
         extractedTankData_c(i).data = zeros(size(fusionedBackgroundData));
 
         index1 = logical(mask1_d4c) + logical(mask_gbf_c);
         I(:,:,1) = index1*255;
         I(:,:,2) = Y_fg;
         I(:,:,3) = zeros(size(index1));
-%         figure(7),imshow(uint8(I)),title('mask\_jbf\_d .* mask\_jbf\_c');
-%         I(:,:,1) = index2*255;
-         figure(8),imshow(uint8(I)),title('logical(mask1\_d4c) + logical(mask\_gbf\_c)');
-        extractedTankData_c(i).data(:,:,1) = uint8(fusionedForegroundData(:,:,1)) .* uint8(index1);
-        extractedTankData_c(i).data(:,:,2) = uint8(fusionedForegroundData(:,:,2)) .* uint8(index1);
-        extractedTankData_c(i).data(:,:,3) = uint8(fusionedForegroundData(:,:,3)) .* uint8(index1);
+
         imwrite(uint8(index1),['E:\dataSet\Wajueji_2\processedData\c_Mask_4d\mask',int2str(k),'_c.png']);
     end
 end
