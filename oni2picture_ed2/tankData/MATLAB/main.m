@@ -24,7 +24,7 @@ if module1 ==1
     imwrite(uint16(fusionedBackgroundData),'E:\dataSet\Wajueji_2\processedData\depth\fusionedBackgroundData\fusionedBackgroundData.png');
 end
 
-for k = 1:200
+for k = 101:2:200%1:200
 foregroundFile = ['E:\dataSet\Wajueji_2\foreground',int2str(k)];
 if module2 == 1
     for i = 1:foregroundFraNum
@@ -61,7 +61,7 @@ disp(['processing k=',int2str(k)]);
 end
 
 %% extract object from color map
-main_color;
+% main_color;
 
 
 %% use mask from color map to extract object
