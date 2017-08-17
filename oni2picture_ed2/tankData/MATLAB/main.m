@@ -14,6 +14,10 @@ module1 = 0; %fusion background
 module2 = 1; %fusion foreground
 module3 = 1; %extract tank in foreground
 
+
+%% extract object from color map
+% main_color;
+
 if module1 ==1 
     %%read backGround data
     for i = 1:fusionBackgroundFraNum
@@ -60,10 +64,6 @@ end
 disp(['processing k=',int2str(k)]);
 end
 
-%% extract object from color map
-% main_color;
-
-
 %% depth recovery
-
+% depthRecovery;
 

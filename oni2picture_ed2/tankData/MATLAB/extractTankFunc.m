@@ -17,7 +17,7 @@ function extractedTankData = extractTankFunc(fusionedBackgroundData, fusionedFor
         mask_1_2 = imerode(mask_1_2, strel('disk', 5));
         I(:,:,1) = mask_1_2*255;
         figure(10),imshow(uint8(I),[]),title('maks\_1\_2');
-        
+        a
         
         mask_1_2 = logical(mask_1_2) + logical(mask1_c);
          I(:,:,1) = mask_1_2*255;
