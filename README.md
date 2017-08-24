@@ -6,4 +6,4 @@ oni2picture_ed2/tankData/MATLAB/*.m:preprocess data(mainly extract object from d
 oni2picture_ed2/tankData/MATLAB/processColor/*.m:extract object from colorMap by depthMap mask and background mask
 
 
-
+branch1:replace main.m with main1.m to realize the process of depthMap and colorMap
