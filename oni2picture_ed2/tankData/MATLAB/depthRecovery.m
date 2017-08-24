@@ -1,10 +1,9 @@
 %%guided depth recovery with fusioned color mask
-function depthRecovery
-    for k = 1:2:200
-        m_name = ['E:\dataSet\Wajueji_2\processedData\mask_d_c\mask',int2str(k),'_d_c_gd50gc50.png'];
-        fg_c_name = ['E:\dataSet\Wajueji_2\processedData\color\fusionedForegroundData\fusionedForegroundData',int2str(k),'.png',]; 
-        fg_d_name = ['E:\dataSet\Wajueji_2\processedData\depth\fusionedForegroundData\fusionedForegroundData',int2str(k),'.png'];
-        mask = imread(m_name); fg_c = imread(fg_c_name); fg_d = imread(fg_d_name);
+function depthRecovery(mask, fg_c, fg_d, k, result_file)
+%         m_name = ['E:\dataSet\Wajueji_2\processedData\mask_d_c\mask',int2str(k),'_d_c_gd50gc50.png'];
+%         fg_c_name = ['E:\dataSet\Wajueji_2\processedData\color\fusionedForegroundData\fusionedForegroundData',int2str(k),'.png',]; 
+%         fg_d_name = ['E:\dataSet\Wajueji_2\processedData\depth\fusionedForegroundData\fusionedForegroundData',int2str(k),'.png'];
+%         mask = imread(m_name); fg_c = imread(fg_c_name); fg_d = imread(fg_d_name);
         
         %%depth recovery
         thres  = 0;
@@ -33,10 +32,7 @@ function depthRecovery
         res_c(:,:,1) = fg_c(:,:,1) .* uint8(mask);
         res_c(:,:,2) = fg_c(:,:,2) .* uint8(mask);
         res_c(:,:,3) = fg_c(:,:,3) .* uint8(mask);
-        imwrite(uint16(res_d), ['E:\dataSet\Wajueji_2\processedData\extractdata_afterDRev\d_',int2str(k),'.png'])
-        imwrite(uint8(res_c), ['E:\dataSet\Wajueji_2\processedData\extractdata_afterDRev\c_',int2str(k),'.png'])
-        
-    end
-    
+        imwrite(uint16(res_d), [result_file,'d_',int2str(k),'.png'])
+        imwrite(uint8(res_c), [result_file,'c_',int2str(k),'.png'])
     
 end

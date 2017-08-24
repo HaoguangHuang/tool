@@ -56,7 +56,7 @@ if module3 == 1
     end
     
 %      saveColorMask(fusionedBackgroundData, fusionedForegroundData, k);
-     extractedTankData = extractTank_color_ycbcr_Func(fusionedBackgroundData, fusionedForegroundData, zeros(size(fusionedBackgroundData)), k);
+     extractedTankData = extractTank_color_ycbcr_Func(fusionedBackgroundData, fusionedForegroundData, k);
     
 end
 
