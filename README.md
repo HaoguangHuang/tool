@@ -7,3 +7,4 @@ oni2picture_ed2/tankData/MATLAB/processColor/*.m:extract object from colorMap by
 
 
 branch1:replace main.m with main1.m to realize the process of depthMap and colorMap
+branch1_1:add node segmentation and hierarchical ICP, based on branch1
