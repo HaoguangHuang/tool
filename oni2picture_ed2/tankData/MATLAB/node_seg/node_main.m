@@ -1,3 +1,4 @@
+%% NODE_MAIN:use K-means to classify pointcloud
 function node_main
 k = 15;%depth frame num
 D = imread(['E:\dataSet\Wajueji_2\processedData\extractdata_afterDRev\d_',int2str(k),'.png']);

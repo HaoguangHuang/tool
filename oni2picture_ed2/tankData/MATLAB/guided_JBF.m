@@ -75,17 +75,13 @@ function [mask_gbf, weight_o, g_t]= guided_JBF(mask, I, is_ime, count_i, weight)
             end
         end
     end
-% figure(1), imshow(mat2gray(mask_gbf), 'border', 'tight'), title('grayscale result')
 mask_gbf = mask_gbf>thres;
 Res_I(:,:,1) = mask_gbf*255;
 Res_I(:,:,2) = I;
 Res_I(:,:,3) = zeros(H,W);
-figure(4), imshow(uint8(Res_I), 'border', 'tight'), title('after JBF')
-% figure(2), imshow(mask_gbf, 'border', 'tight'), title('after JBF')
+global debug_mode;
+if debug_mode, figure(4), imshow(uint8(Res_I)), title('after JBF'),drawnow; end;
 Res_I(:,:,1) = mask*255;
-figure(3), imshow(uint8(Res_I), 'border', 'tight'), title('before JBF')
-  
+if debug_mode, figure(3), imshow(uint8(Res_I)), title('before JBF'),drawnow; end;
 g_t = abs(sum(sum(logical(mask) - logical(mask_gbf))));
-
-
 end

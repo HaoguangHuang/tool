@@ -15,7 +15,7 @@ mask_d_c_file = 'E:\dataSet\Wajueji_2\processedData\mask_d_c\';           %save 
 result_file = 'E:\dataSet\Wajueji_2\processedData\extractdata_afterDRev\';%save ycbcr/depth map after segmenting by final mask
 fu_bg_d = imread(fusioned_Bg_d_file);
 fu_bg_c = imread(fusioned_Bg_c_file);
-mask_d4c = []; mask_c4d = [];
+% mask_d4c = []; mask_c4d = [];
 for k = 18:2:200 %1:frameNum
     fu_fg_d = imread([fusioned_Fg_d_file,'fusionedForegroundData',int2str(k),'.png']);
     fu_fg_c = imread([fusioned_Fg_c_file,'fusionedForegroundData',int2str(k),'.png']);

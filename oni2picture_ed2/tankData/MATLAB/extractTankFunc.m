@@ -1,29 +1,28 @@
 function mask = extractTankFunc(fusionedBackgroundData, fusionedForegroundData,fu_fg_c, k, mask_gbf_c...
-    , mask_file, mask_1_2)
-        mask2 = (fusionedForegroundData < 1000) .* (fusionedForegroundData > 0) ;
+    , mask_file, mask_d4c)
+        mask2 = (fusionedForegroundData < 1500) .* (fusionedForegroundData > 0) ;
         %%%%%
-        I(:,:,1) = mat2gray(mask_1_2)*255;
+        gt = imread(['E:\dataSet\ICAISS\Hybrid_FBS\ShSeq\ShSeq\groundTruth\gt_',int2str(k),'BW.bmp']);
+        I(:,:,1) = mat2gray(mask_d4c)*255;
         I(:,:,2) = fu_fg_c(:,:,1);
-        I(:,:,3) = zeros(size(fusionedBackgroundData));
-        figure(10),imshow(uint8(I),[]),title('maks\_1\_2');
+        I(:,:,3) = mat2gray(gt)*255;
+        figure(10),imshow(uint8(I),[]),title('maks\_d4c');drawnow;
 
-        mask_1_2 = logical(mask_1_2) + logical(mask_gbf_c);
-         I(:,:,1) = mask_1_2*255;
-        figure(10),imshow(uint8(I),[]),title('maks\_1\_2');
-%         mask_1_2 = mask_1_2 .* mask2;
-%          I(:,:,1) = mask_1_2*255;
-%         figure(10),imshow(uint8(I),[]),title('maks\_1\_2');
+        mask_d4c = logical(mask_d4c) + logical(mask_gbf_c);
+         I(:,:,1) = mask_d4c*255;
+        figure(10),imshow(uint8(I),[]),title('maks\_d4c+mask_gbf_c');drawnow;
+
         %%
         count = 0;%第一次执行
         weight_i = zeros(1,1);
         %先执行一次全局的guided_JBF，得到完整的weight_o
-        [~, weight_o,~]= guided_JBF(mask_1_2, fu_fg_c(:,:,1),1,count, weight_i);%这里只是计算了weight_o
+        [~, weight_o,~]= guided_JBF(mask_d4c, fu_fg_c(:,:,1),1,count, weight_i);%这里只是计算了weight_o
         count = count + 1;
-        g_thres = 10;%guided thres------per pixel
+        g_thres = 0;%guided thres------per pixel
         g_t = 100000000;
         while 1
-            [mask_1_2, ~, g_t] = guided_JBF(mask_1_2, fu_fg_c(:,:,1), -1, count, weight_o);%guided imdilate
-            if g_t < g_thres
+            [mask_d4c, ~, g_t] = guided_JBF(mask_d4c, fu_fg_c(:,:,1), -1, count, weight_o);%guided imdilate
+            if g_t <= g_thres
                 disp(['frame ',int2str(k), '------------total for ', int2str(count), ' times!']);
                 break;
             end
@@ -31,13 +30,15 @@ function mask = extractTankFunc(fusionedBackgroundData, fusionedForegroundData,f
             count = count + 1;
             
         end
-        mask_gbf_d = mask_1_2;
-        imwrite(uint8(mask_gbf_d), [mask_file,'mask',int2str(k),'_d_c_gd50gc50.png']);
+        mask_gbf_d = mask_d4c;
+        imwrite(uint8(mask_gbf_d), [mask_file,'res_',int2str(k),'.png']);
+        mask_gbf_d = mask_gbf_d + mask_d4c;
+        
         I(:,:,1) = mask_gbf_d*255;
         I(:,:,2) = fu_fg_c(:,:,1);
-        I(:,:,3) = zeros(size(mask_gbf_d));
-        figure(18),imshow(uint8(I)),title('final result');
-        imwrite(uint8(I), [mask_file,'\vis\vis_mask',int2str(k),'_d_c_gd50gc50.png'])
+        I(:,:,3) = mat2gray(gt)*255;
+        figure(18),imshow(uint8(I)),title('final result');drawnow;
+        imwrite(uint8(I), [mask_file,'vis\res_',int2str(k),'.png'])
 %         result(1).data = uint16(fusionedForegroundData) .* uint16(mask_gbf_d);
         
         mask = mask_gbf_d;
