@@ -17,7 +17,7 @@ FP = sum(sum(FP_map)); FN = sum(sum(FN_map));
 Re = TP/(TP+FN);                  % Recall
 Sp = TN/(TN+FP);                  % Specificity
 FPR = FP/(FP+TN);                 % False Positive Rate
-FNR = FN/(TN+FP);                 % False Negative Rate
+FNR = FN/(TP+FN);                 % False Negative Rate
 PWC = 100*(FN+FP)/(TP+FN+FP+TN);  % Percentage of Wrong Classifications
 Pr = TP/(TP+FP);                  % Precision
 F_score = 2*Pr*Re/(Pr + Re);      % F-measure

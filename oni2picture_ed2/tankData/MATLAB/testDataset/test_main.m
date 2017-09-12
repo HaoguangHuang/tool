@@ -36,7 +36,10 @@ end
 end
 
 %%=================Evaluation===============
-
+[mean_res, res_mat] = Evaluation_RGBD('E:\dataSet\ICAISS\Hybrid_FBS\ShSeq\ShSeq',...
+                                        'backUp',...
+                                        'png',...
+                                        'groundTruth');
 
 
 
