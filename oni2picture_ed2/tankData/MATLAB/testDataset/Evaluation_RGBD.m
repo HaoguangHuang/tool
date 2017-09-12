@@ -26,11 +26,11 @@ for i=1:num_GT  % 'ColCamSeq'/ 'DCamSeq' / 'GenSeq' / 'ShSeq'
     GT_mask = imread([Folder_Name '/' GT_FolderName '/' GT_fname(idx(i)).name]);
     % Note: results should be stored using the name like "res_%d.png" or "res_%d.bmp"
     Res_mask = imread([Folder_Name '/' Res_FolderName '/res_' num2str(frame_no) '.' ResExt]);
-    res_vec = cal_Fscore(double(Res_mask), double(GT_mask), 1);
+    res_vec = cal_Fscore(double(Res_mask), double(GT_mask));
     MAE = sum(sum(abs(double(GT_mask>0) - double(Res_mask>0))))/num_px;
     res_mat(i, :) = [res_vec MAE];
 end
-mean_res = mean(res_mat);
+mean_res = mean(res_mat); std_res = std(res_mat);
 
 
 
