@@ -1,10 +1,10 @@
 function [mask_gbf, weight_o, g_t]= guided_JBF(mask, I, is_ime, count_i, weight)
     I = double(I);
     [H, W]  =size(mask);  mask_gbf = zeros(H,W);
-    win_width = 11;%奇数容易分配num
-    win_height =11; num_win = win_height*win_height;
+    win_width = 7;%奇数容易分配num
+    win_height =7; num_win = win_height*win_height;
     half_w = (win_width-1)/2;
-    sigma_c = 8;
+    sigma_c = 3;  %the smaller the sigma_c is, and the more sensitive to color intensity difference
     thres = 0.5;
     g_t = 0;%count the num of changing pixels in mask
     sigma_precompute = -2*sigma_c*sigma_c;

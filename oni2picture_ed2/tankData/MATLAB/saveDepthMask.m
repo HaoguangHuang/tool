@@ -1,17 +1,32 @@
 %% SAVE_DEPTH_MASK:depth foreground substraction
-function m = saveDepthMask(fu_bg_d, fu_fg_d, k, ~, fu_fg_c)
-    fb_thres = 15;
-    fore_thres = 1800;
-    gt = imread(['E:\dataSet\ICAISS\Hybrid_FBS\ShSeq\ShSeq\groundTruth\gt_',int2str(k),'BW.bmp']);
-    mask1_d =  abs(double(fu_bg_d) - (double(fu_fg_d)))>fb_thres;
-    mask2_d = (fu_fg_d < fore_thres) .* (fu_fg_d >= 0) ;
-    mask1_d = mask1_d .* mask2_d;
-    mask1_d = imerode(mask1_d,strel('disk',3));
-    mask1_d = imerode(mask1_d,strel('disk',5));
-    I(:,:,1) = mat2gray(mask1_d)*255;
+function m = saveDepthMask(fu_bg_d, fu_fg_d, k, ~, fu_fg_c, series)
+    fb_thres = 50;
+    fore_thres = 2400;
+    global debug_mode;
+    gt = imread(['E:\dataSet\ICAISS\Hybrid_FBS\',series,'\',series,'\','groundTruth\gt_',int2str(k),'.bmp']);
     I(:,:,2) = fu_fg_c(:,:,1);
     I(:,:,3) = mat2gray(gt)*255;
-    figure(888),imshow(uint8(I));drawnow;
-
+    
+    mask1_d =  abs(double(fu_bg_d) - (double(fu_fg_d)))>fb_thres;
+    I(:,:,1) = mat2gray(mask1_d)*255;
+    if debug_mode, figure(888),imshow(uint8(I));drawnow; end;
+    
+    mask2_d = fu_fg_d < fore_thres;
+    I(:,:,1) = mat2gray(mask2_d)*255;
+    if debug_mode, figure(888),imshow(uint8(I));drawnow; end;
+    
+    mask1_d = mask1_d .* mask2_d;
+    I(:,:,1) = mat2gray(mask1_d)*255;
+    if debug_mode, figure(888),imshow(uint8(I));drawnow; end;
+    
+    mask1_d = imerode(mask1_d,strel('disk',3));
+    I(:,:,1) = mat2gray(mask1_d)*255;
+    if debug_mode, figure(888),imshow(uint8(I));drawnow; end;
+    
+    mask1_d = imerode(mask1_d,strel('disk',5));
+    I(:,:,1) = mat2gray(mask1_d)*255;
+    if debug_mode, figure(888),imshow(uint8(I));drawnow; end;
+    
+    if debug_mode, figure(1),imshow(fu_fg_d,[]);figure(2),imshow(fu_bg_d,[]); end;
     m = mask1_d;  
 end

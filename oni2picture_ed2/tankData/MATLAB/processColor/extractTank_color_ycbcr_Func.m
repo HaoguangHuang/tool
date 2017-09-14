@@ -1,13 +1,14 @@
 function mask_gbf_c = extractTank_color_ycbcr_Func(fusionedBackgroundData, fusionedForegroundData, k,...
-    mask1_d4c, mask_c4d)
+    mask_d4c, mask_c4d, series)
     %%取mask
+        global debug_mode;
         Y_fg = fusionedForegroundData(:,:,1);
         Y_bg = fusionedBackgroundData(:,:,1);
 
-        figure(888),imshow(mask_c4d,[]),title('color intensity substract');drawnow;
+        if debug_mode, figure(888),imshow(mask_c4d,[]),title('color intensity substract');drawnow; end;
         
-        mask_c4d = logical(mask1_d4c) .* mask_c4d;
-        figure(666),imshow(mask_c4d,[]),title('mask1\_d .* mask1');drawnow;
+        mask_c4d = logical(mask_d4c) .* mask_c4d;
+        if debug_mode, figure(666),imshow(mask_c4d,[]),title('mask1\_d .* mask1');drawnow; end;
 
         count = 0;%第一次执行
         weight_i = zeros(1,1);
@@ -25,15 +26,15 @@ function mask_gbf_c = extractTank_color_ycbcr_Func(fusionedBackgroundData, fusio
             count = count + 1;
             disp(['g_t = ',int2str(g_t), ', now is ' ,int2str(count), 'th time']);
         end
-        gt = imread(['E:\dataSet\ICAISS\Hybrid_FBS\ShSeq\ShSeq\groundTruth\gt_',int2str(k),'BW.bmp']);
+        gt = imread(['E:\dataSet\ICAISS\Hybrid_FBS\',series,'\',series,'\','groundTruth\gt_',int2str(k),'.bmp']);
         
         mask_gbf_c = mask_c4d;
         I(:,:,1) = mask_gbf_c*255;
         I(:,:,2) = Y_fg;
         I(:,:,3) = mat2gray(gt)*255;
-        figure(666),imshow(uint8(I));
-        mask_gbf_c = logical(mask1_d4c) + logical(mask_gbf_c);
+        if debug_mode, figure(666),imshow(uint8(I));end;
+        mask_gbf_c = logical(mask_d4c) + logical(mask_gbf_c);
         I(:,:,1) = mask_gbf_c*255;
-        figure(666),imshow(uint8(I));drawnow;
+        if debug_mode, figure(666),imshow(uint8(I));drawnow; end;
 %         imwrite(uint8(mask_gbf_c),['E:\dataSet\Wajueji_2\processedData\c_Mask_4d\mask',int2str(k),'_c.png']);
     end

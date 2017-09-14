@@ -1,16 +1,17 @@
 function mask = extractTankFunc(fusionedBackgroundData, fusionedForegroundData,fu_fg_c, k, mask_gbf_c...
-    , mask_file, mask_d4c)
-        mask2 = (fusionedForegroundData < 1500) .* (fusionedForegroundData > 0) ;
+    , mask_file, mask_d4c, series)
+        global debug_mode;
+        mask2 = (fusionedForegroundData < 2100) .* (fusionedForegroundData > 0) ;
         %%%%%
-        gt = imread(['E:\dataSet\ICAISS\Hybrid_FBS\ShSeq\ShSeq\groundTruth\gt_',int2str(k),'BW.bmp']);
+        gt = imread(['E:\dataSet\ICAISS\Hybrid_FBS\',series,'\',series,'\','groundTruth\gt_',int2str(k),'.bmp']);
         I(:,:,1) = mat2gray(mask_d4c)*255;
         I(:,:,2) = fu_fg_c(:,:,1);
         I(:,:,3) = mat2gray(gt)*255;
-        figure(10),imshow(uint8(I),[]),title('maks\_d4c');drawnow;
+        if debug_mode ,figure(10),imshow(uint8(I),[]),title('maks\_d4c');drawnow; end;
 
         mask_d4c = logical(mask_d4c) + logical(mask_gbf_c);
          I(:,:,1) = mask_d4c*255;
-        figure(10),imshow(uint8(I),[]),title('maks\_d4c+mask_gbf_c');drawnow;
+        if debug_mode, figure(10),imshow(uint8(I),[]),title('maks\_d4c+mask_gbf_c');drawnow; end;
 
         %%
         count = 0;%第一次执行
@@ -37,7 +38,7 @@ function mask = extractTankFunc(fusionedBackgroundData, fusionedForegroundData,f
         I(:,:,1) = mask_gbf_d*255;
         I(:,:,2) = fu_fg_c(:,:,1);
         I(:,:,3) = mat2gray(gt)*255;
-        figure(18),imshow(uint8(I)),title('final result');drawnow;
+        if debug_mode, figure(18),imshow(uint8(I)),title('final result');drawnow; end;
         imwrite(uint8(I), [mask_file,'vis\res_',int2str(k),'.png'])
 %         result(1).data = uint16(fusionedForegroundData) .* uint16(mask_gbf_d);
         

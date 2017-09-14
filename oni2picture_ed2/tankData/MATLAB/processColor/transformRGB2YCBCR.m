@@ -1,8 +1,8 @@
 %% TRANSFORM_RGB2YCBCR : transform color background
 function transformRGB2YCBCR
-    outputFile_address = 'E:\dataSet\ICAISS\Hybrid_FBS\ShSeq\ShSeq\ycbcrData\';
-    inputFile_address = 'E:\dataSet\ICAISS\Hybrid_FBS\ShSeq\ShSeq\colorData\';
-    for i = 420:540     %%420~540
+    outputFile_address = 'E:\dataSet\ICAISS\Hybrid_FBS\GenSeq\GenSeq\ycbcrData\';
+    inputFile_address = 'E:\dataSet\ICAISS\Hybrid_FBS\GenSeq\GenSeq\colorData\';
+    for i = 800:1100     %%420~540
         disp(['processing frame', int2str(i)]);
          raw_rgb_map = imread([inputFile_address, 'img_', int2str(i), '.Jpeg']);
          ycbcr_map = rgb2ycbcr(raw_rgb_map);

@@ -16,7 +16,7 @@ if nargin<2, D_FolderName = 'depthData'; end
 if nargin<3, RGB_FolderName = 'colorData'; end
 if nargin<4, depth_ext = 'png'; end    % for 'stereoSeq', depth_ext = 'bmp'; 
 if nargin<5, color_ext = 'jpeg'; end   % for 'stereoSeq', color_ext = 'bmp'; 
-debug_mode = 0; 
+global debug_mode;
 
 rgb_fname = dir([Folder_Name '/' RGB_FolderName '/*.' color_ext]);
 [~,idx] = sortrows([rgb_fname.datenum].'); 
