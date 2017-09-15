@@ -3,23 +3,22 @@
 
 % clear all; close all;
 warning('off');   
-global debug_mode;  debug_mode = 0;  
-series = 'GenSeq'; root_dir = ['E:\dataSet\ICAISS\Hybrid_FBS\' series '\'];
-frameStart = 924; frameEnd = 1038;
+global debug_mode;  debug_mode = 1;  
+series = 'stereoSeq'; root_dir = ['E:\dataSet\ICAISS\Hybrid_FBS\' series '\'];
+frameStart = 208; frameEnd = 298;
 %%==================background fusion==================
-if 0
+if 1
 [c_bg, d_bg] = Extract_BG_From_DataSet([root_dir series]);
 GenSeq_d_bg = d_bg;
 GenSeq_c_bg = c_bg;
-save('data.mat',[series,'_d_bg'],'-append');
-save('data.mat',[series,'_c_bg'],'-append');
+save('background.mat',[series,'_d_bg'],'-append');
+save('background.mat',[series,'_c_bg'],'-append');
 else
-    load('data.mat',[series,'_d_bg'],[series,'_c_bg']);
-    d_bg = GenSeq_d_bg;  c_bg = GenSeq_c_bg;
+    load('background.mat',[series,'_d_bg'],[series,'_c_bg']);
+    eval(['d_bg = ', series, '_d_bg;  c_bg = ', series, '_c_bg;']);
 end
 %%=================foreground substraction===============
-for k = 981:3:frameEnd
-    if k == 939, continue; end
+for k = frameStart:18:frameEnd
 if 1
     d_fg = imread([root_dir '\' series '\depthData\depth_' int2str(k) '.png']);
     c_fg = imread([root_dir '\' series '\ycbcrData\ycbcr_color_' int2str(k) '.png']);

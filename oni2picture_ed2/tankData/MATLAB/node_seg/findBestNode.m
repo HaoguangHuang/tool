@@ -10,7 +10,7 @@
 
 function [outlier_index, pc_bestNode_distr] = findBestNode(pc1, pc2, Tmat, pc_set1_node_index, layers, thres)
     if nargin < 4, error('function FINDBESTNODE don''t have enough parameters!');
-    elseif nargin < 5, layers = 4; thres = 1;%mm
+    elseif nargin < 5, layers = 4;           %mm
     elseif nargin < 6, thres = 1;            %mm
     end
     
@@ -18,9 +18,10 @@ function [outlier_index, pc_bestNode_distr] = findBestNode(pc1, pc2, Tmat, pc_se
     one_index = tmp == 1;   morethanone_index = tmp > 1;
     pc_bestNode_distr = zeros(pc1.Count,1); outlier_index = zeros(pc1.Count,2);
     tt = zeros(pc1.Count,1);  dd = zeros(pc1.Count,1); dd(:,2) = ones(pc1.Count,1)*inf;
-    for i = 1:pc1.Count
-        tt(i,1) = i; dd(i,1) = i; outlier_index(i,1) = i;
-    end 
+    
+    tt(:,1) = linspace(1,pc1.Count,pc1.Count);  
+    dd(:,1) = linspace(1,pc1.Count,pc1.Count);
+    outlier_index(:,1) = linspace(1,pc1.Count,pc1.Count);
     %%========process point belonging to one node first=========
     for i = tt(one_index)'
        pc_bestNode_distr(i,1) = find(pc_set1_node_index(i,:)); 

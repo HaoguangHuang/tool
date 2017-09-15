@@ -21,7 +21,7 @@ D = imread([Folder_Name '/' GT_FolderName '/' GT_fname(idx(1)).name]);
 res_mat = zeros(num_GT, 4);  % 4D detection accuracy
 for i=1:num_GT  % 'ColCamSeq'/ 'DCamSeq' / 'GenSeq' / 'ShSeq'
     str_gtname = GT_fname(idx(i)).name;
-    frame_no = sscanf(str_gtname, 'gt_%dBW.bmp');
+    frame_no = sscanf(str_gtname, 'gt_%d.bmp');
     GT_mask = imread([Folder_Name '/' GT_FolderName '/' GT_fname(idx(i)).name]);
     % Note: results should be stored using the name like "res_%d.png" or "res_%d.bmp"
     Res_mask = imread([Folder_Name '/' Res_FolderName '/res_' num2str(frame_no) '.' ResExt]);

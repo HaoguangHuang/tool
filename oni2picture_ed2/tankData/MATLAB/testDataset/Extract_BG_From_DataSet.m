@@ -25,7 +25,7 @@ d_fname = dir([Folder_Name '/' D_FolderName '/*.' depth_ext]);
 D = imread([Folder_Name '/' D_FolderName '/' d_fname(idx(1)).name]);  [H, W] = size(D);
 color_BG = zeros(H, W); depth_BG = color_BG; cnt_map = color_BG;
 % num_px = H*W;  mat_Y = zeros(num_px, 60);  mat_D = mat_Y;
-for i=1:60  % use 60 frames for 'ColCamSeq'/ 'DCamSeq' / 'GenSeq' / 'ShSeq'
+for i=1:25  % use 60 frames for 'ColCamSeq'/ 'DCamSeq' / 'GenSeq' / 'ShSeq'
     % --------------------- color BG ---------------------
     I = imread([Folder_Name '/' RGB_FolderName '/' rgb_fname(idx(i)).name]);
     yuv_I = rgb2ycbcr(I);

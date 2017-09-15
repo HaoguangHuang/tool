@@ -224,8 +224,8 @@ for i = 1 : maxIterations
     printer.printMessageNoReturn('vision:pointcloud:findCorrespondenceStart');
     
     % ==============Find the correspondence===============
-%     [indices, dists] = multiQueryKNNSearchImpl(ptCloudB, locA, 1);   %locA:an array from pointcloud1
-    [indices, dists] = findCorr_withInten(ptCloudB, locA, ptCloudA);
+    [indices, dists] = multiQueryKNNSearchImpl(ptCloudB, locA, 1);   %locA:an array from pointcloud1
+%     [indices, dists] = findCorr_withInten(ptCloudB, locA, ptCloudA);
     
     % Remove outliers
     keepInlierA = false(ptCloudA.Count, 1); 

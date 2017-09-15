@@ -1,5 +1,5 @@
  function reg_main
-    close all;  global debug_mode; debug_mode = 0;
+    close all;  global debug_mode; debug_mode = 1;
     if nargin < 1, frameNum = 2; end %197-198
     camera_para = struct('fx',504.261,'fy',503.905,'cx',352.457,'cy',272.202);
 %% read depth data and tranform to pointcloud
@@ -7,7 +7,7 @@
     for i = 1:frameNum
         D{i} = imread(['E:\dataSet\Wajueji_2\processedData\extractdata_afterDRev\d_',int2str(i+196),'.png']); 
         Yuv{i} = imread(['E:\dataSet\Wajueji_2\processedData\extractdata_afterDRev\c_',int2str(i+196),'.png']);
-        pc{i} = transformUVD2XYZInten(double(D{i}), Yuv{i}(:,:,1), camera_para);
+        eval(['[pc{i}, relation_pc',int2str(i),'_dmap]= transformUVD2XYZInten(double(D{i}), Yuv{i}(:,:,1), camera_para);']);
         pc{i} = pcdenoise(pc{i});
     end
     roi = [-230,inf;-inf,inf;0,980]; %197-198
@@ -15,6 +15,9 @@
     if debug_mode, figure(101),pcshow(pc{1}), title('before ROI filter'); end
     pc{1} = select(pc{1},findPointsInROI(pc{1},roi));%place wajueji in ROI
     if debug_mode, figure(100),pcshow(pc{1}),title('after ROI filter'); end
+    
+%     relation_pc1_dmap = find_relation(relation_pc1_dmap, pc{1}); %this function is a rubbish
+%     save('relation_pc_dmap.mat','relation_pc1_dmap');
 %% hierarchical node
     layers = 4; 
     node_r = [500,250,200,150]/2; %mm. orient to node num = 1,4,8,12
@@ -36,7 +39,7 @@
 %% node ICP
     [Tmat, rmse]= hierarchical_ICP(pc_set1,pc_set2,layers, node_tree);
     this_file = 'E:\Code\vs2010\oni2picture_ed2\oni2picture_ed2\tankData\MATLAB\node_seg\';
-    if 0%debug_mode 
+    if 0 %debug_mode 
     save([this_file,'Tmat_wc03.mat'],'Tmat');
     save([this_file,'rmse_wc03.mat'],'rmse');
     analyseTmat(Tmat);%visualize rotation angle and translation
@@ -49,21 +52,35 @@
     corrIndex = find_unique_corr(pc_bestNode_distr, pc{1}, pc{2}, Tmat{layers}, thres_corr);
 %% visualize pc1 in coordinate of pc2 with unique correspondence transformation
     if debug_mode, visualize_with_corr(pc{1}, pc{2}, corrIndex, Tmat{layers},pc_bestNode_distr); end
-end
+    
+    visualize_energy_map(pc{1}, pc{2}, corrIndex, camera_para);
+ end
 
-function p = transformUVD2XYZInten(d, Intensity, c_pa)
+ 
+ 
+ 
+ 
+ %%===============================================================================================================
+ %%===============================================================================================================
+% relation_pc_dmap:array. [u,v,x,y, cloud_indice]
+function [p, relation_pc_dmap]= transformUVD2XYZInten(d, Intensity, c_pa)
     [H, W] = size(d);
     p_array(:,3) = reshape(d,H*W,1);        %z can obtain from var d
-    y_array = zeros(H*W,1);
+    y_array = zeros(H*W,1); relation_pc_dmap = zeros(H*W, 5);
     for u = 1:W
         for v = 1:H
             p_array((u-1)*H+v,1) = (u - c_pa.cx) * d(v,u)/ c_pa.fx;
             p_array((u-1)*H+v,2) = (v - c_pa.cy) * d(v,u)/ c_pa.fy;
-            y_array((u-1)*H+v,1) = Intensity(v,u);% y_array:n*1, one dimension is y intensity                       
+            y_array((u-1)*H+v,1) = Intensity(v,u);% y_array:n*1, one dimension is y intensity
+            relation_pc_dmap((u-1)*H+v,1:4) = [u, v, p_array((u-1)*H+v,1), p_array((u-1)*H+v,2)];
         end
     end
     index = p_array(:,3)>0;
-    p_array = p_array(index,:);  p = pointCloud(p_array);
+    
+    relation_pc_dmap = relation_pc_dmap(index,:);
+    relation_pc_dmap(:,5) = linspace(1, size(relation_pc_dmap,1), size(relation_pc_dmap,1));
+    p_array = p_array(index,:); 
+    p = pointCloud(p_array);
     p.Color = [y_array(index,:),uint8(zeros(p.Count,2))];   % give ycbcr intensity to pc
 end
 
@@ -168,7 +185,21 @@ function edge = findConnection(son,parent)
     [~, edge] = min(sum(dist,2)); % need not to sqrt
 end
 
-
-
+%% FIND_RELATION: 
+%  Since the pointcloud indice will be in chaos after findPointsInROI, here find the correct relation between
+%    pc1 and depth map.
+function newRelation = find_relation(relation_pc1_dmap, pc1)
+    newRelation = zeros(pc1.Count, 5);
+    parpool('local',4);
+    parfor i = 1:pc1.Count
+        for j = 1:size(relation_pc1_dmap,1)
+            if pc1.Location(i,1) == relation_pc1_dmap(j,3) && pc1.Location(i,2) == relation_pc1_dmap(j,4)
+                newRelation(i,:) = [relation_pc1_dmap(j,1:4), i];
+            end
+        end
+        disp([int2str(i),' finished!']);
+    end
+    delete(gcp('nocreate'));
+end
 
 

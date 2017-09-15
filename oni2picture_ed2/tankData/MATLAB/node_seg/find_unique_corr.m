@@ -4,7 +4,7 @@
 %                 pc1:pointCloud.  moving pointcloud
 %                 pc2:pointCloud.  fixed pointcloud
 %              layers:scalar.      number of node layer
-%           corrIndex:array.       Its size is pc1.Count*3. [indice1, correspondence, dist]
+%           corrIndex:array.       Its size is pc1.Count*3. [indice, correspondence, dist]
 function corrIndex = find_unique_corr(pc_bestNode_distr, pc1, pc2, tmat, thres_corr)
     if nargin < 1, load('pc_bestNode_distr.mat','pc_bestNode_distr_wc03');pc_bestNode_distr = pc_bestNode_distr_wc03;end
     if nargin < 2, load('pc.mat','pc_197'); pc1 = pc_197; end
