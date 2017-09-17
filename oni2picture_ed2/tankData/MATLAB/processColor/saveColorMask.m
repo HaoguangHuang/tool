@@ -1,9 +1,9 @@
-function m = saveColorMask(fu_bg_c, fu_fg_c, k, subs_file, series)
-    thres = 10;
-    global debug_mode;
+function m = saveColorMask(fu_bg_c, fu_fg_c, ~, ~, ~)
+    thres = 20;
+    global debug_mode;   global gt;
     Y_fg = fu_fg_c(:,:,1);
-    Y_bg = fu_bg_c(:,:,1);
-    gt = imread(['E:\dataSet\ICAISS\Hybrid_FBS\',series,'\',series,'\','groundTruth\gt_',int2str(k),'.bmp']);
+    Y_bg = fu_bg_c;
+
     mask1 = abs(double(Y_bg) - double(Y_fg)) > thres;
 %     imwrite(uint8(mask1), [subs_file,'mask',int2str(k),'_c.png']);
     I(:,:,1) = mat2gray(mask1)*255;

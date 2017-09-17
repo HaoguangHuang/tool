@@ -1,7 +1,7 @@
 function mask_gbf_c = extractTank_color_ycbcr_Func(fusionedBackgroundData, fusionedForegroundData, k,...
     mask_d4c, mask_c4d, series)
     %%ȡmask
-        global debug_mode;
+        global debug_mode;    global gt;
         Y_fg = fusionedForegroundData(:,:,1);
         Y_bg = fusionedBackgroundData(:,:,1);
 
@@ -26,7 +26,6 @@ function mask_gbf_c = extractTank_color_ycbcr_Func(fusionedBackgroundData, fusio
             count = count + 1;
             disp(['g_t = ',int2str(g_t), ', now is ' ,int2str(count), 'th time']);
         end
-        gt = imread(['E:\dataSet\ICAISS\Hybrid_FBS\',series,'\',series,'\','groundTruth\gt_',int2str(k),'.bmp']);
         
         mask_gbf_c = mask_c4d;
         I(:,:,1) = mask_gbf_c*255;
