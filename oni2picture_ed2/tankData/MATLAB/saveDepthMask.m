@@ -1,7 +1,7 @@
 %% SAVE_DEPTH_MASK:depth foreground substraction
 function m = saveDepthMask(fu_bg_d, fu_fg_d, ~, ~, fu_fg_c, ~)
-    fb_thres = 50;
-    fore_thres = 2000;
+    fb_thres = 60;
+    fore_thres = 3100;
     global debug_mode;   global gt;
     
     I(:,:,2) = fu_fg_c(:,:,1);
@@ -11,19 +11,23 @@ function m = saveDepthMask(fu_bg_d, fu_fg_d, ~, ~, fu_fg_c, ~)
     I(:,:,1) = mat2gray(mask1_d)*255;
     if debug_mode, figure(888),imshow(uint8(I));drawnow; end;
     
-    mask2_d = fu_fg_d < fore_thres;
+    mask2_d = fu_fg_d < fore_thres & fu_fg_d > 0;
     I(:,:,1) = mat2gray(mask2_d)*255;
     if debug_mode, figure(888),imshow(uint8(I));drawnow; end;
     
-    mask1_d = mask1_d .* mask2_d;
+    mask1_d = logical(mask1_d) & mask2_d;
     I(:,:,1) = mat2gray(mask1_d)*255;
     if debug_mode, figure(888),imshow(uint8(I));drawnow; end;
     
-    mask1_d = imerode(mask1_d,strel('disk',5));
-    I(:,:,1) = mat2gray(mask1_d)*255;
-    if debug_mode, figure(888),imshow(uint8(I));drawnow; end;
+%     mask1_d = imerode(mask1_d,strel('disk',5));
+%     I(:,:,1) = mat2gray(mask1_d)*255;
+%     if debug_mode, figure(888),imshow(uint8(I));drawnow; end;
+%     
+%     mask1_d = imerode(mask1_d,strel('disk',5));
+%     I(:,:,1) = mat2gray(mask1_d)*255;
+%     if debug_mode, figure(888),imshow(uint8(I));drawnow; end;
     
-    mask1_d = imerode(mask1_d,strel('disk',5));
+    mask1_d = imerode(mask1_d,strel('disk',0));
     I(:,:,1) = mat2gray(mask1_d)*255;
     if debug_mode, figure(888),imshow(uint8(I));drawnow; end;
     

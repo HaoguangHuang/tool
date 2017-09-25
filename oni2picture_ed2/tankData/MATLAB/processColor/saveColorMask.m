@@ -1,5 +1,5 @@
-function m = saveColorMask(fu_bg_c, fu_fg_c, ~, ~, ~)
-    thres = 20;
+function m = saveColorMask(fu_bg_c, fu_fg_c)
+    thres = 55;
     global debug_mode;   global gt;
     Y_fg = fu_fg_c(:,:,1);
     Y_bg = fu_bg_c;

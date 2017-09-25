@@ -5,13 +5,13 @@
 warning('off');   
 global debug_mode;  debug_mode = 1;  
 global gt;
-series = 'DCamSeq'; root_dir = ['E:\dataSet\ICAISS\Hybrid_FBS\' series '\'];
+series = 'ColCamSeq'; root_dir = ['E:\dataSet\ICAISS\Hybrid_FBS\' series '\'];
 frameStart = 800; frameEnd = 1199;
 %%==================background fusion==================
 if 0
 [c_bg, d_bg] = Extract_BG_From_DataSet([root_dir series]);
-DCamSeq_d_bg = d_bg;
-DCamSeq_c_bg = c_bg;
+ColCamSeq_d_bg = d_bg;
+ColCamSeq_c_bg = c_bg;
 save('background.mat',[series,'_d_bg'],'-append');
 save('background.mat',[series,'_c_bg'],'-append');
 else
@@ -21,8 +21,10 @@ end
 %%=================foreground substraction===============
 gtFile = ['E:\dataSet\ICAISS\Hybrid_FBS\' series '\' series '\groundTruth\'];
 idx = getFileID(gtFile);
-mask_border = imread('E:\dataSet\ICAISS\Hybrid_FBS\DCamSeq\DCamSeq\groundTruth\gt_DepthCAM_BW.bmp');
-for k = 917%idx(:,1)'%frameStart:3:frameEnd
+mask_border = imread('E:\dataSet\ICAISS\Hybrid_FBS\ColCamSeq\ColCamSeq\groundTruth\gt_ColorCAM_BW.bmp');
+
+for k = 1081%idx(19:end,1)'%frameStart:3:frameEnd
+if 1
     gt = imread([root_dir '\' series '\groundTruth\gt_' int2str(k) 'BW.bmp']);
     d_fg = imread([root_dir '\' series '\depthData\depth_' int2str(k) '.png']);
     c_fg = imread([root_dir '\' series '\ycbcrData\ycbcr_color_' int2str(k) '.png']);
@@ -31,8 +33,11 @@ for k = 917%idx(:,1)'%frameStart:3:frameEnd
     mask_c4d = saveColorMask(c_bg, c_fg);
     %%======process ycbcr map======%%
     if 1
-        mask_gbf_c = extractTank_color_ycbcr_Func(c_bg, c_fg, k, mask_d4c, mask_c4d, series,mask_border);
+        mask_gbf_c = extractTank_color_ycbcr_Func(c_bg, c_fg, k, mask_d4c, mask_c4d, series, mask_border);
     end
+else
+    load('mask_gbf_c.mat',[series, '_mask_gbf_c']); mask_gbf_c = GenSeq_mask_gbf_c;
+end
 
 if 1
     %%======process depth map======%%

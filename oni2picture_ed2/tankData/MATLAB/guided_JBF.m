@@ -1,15 +1,15 @@
 function [mask_gbf, weight_o, g_t]= guided_JBF(mask, I, is_ime, count_i, weight, ...
-    sigma_c, win_width)
+    sigma_c, win_width, thres)
     I = double(I);
     [H, W]  =size(mask);  mask_gbf = zeros(H,W);
-    if nargin<6, sigma_c = 3;end  %the smaller the sigma_c is, and the more sensitive to color intensity difference
-    if nargin<7,win_width = 5;end%奇数容易分配num
+    if nargin<6, sigma_c = 8;end   %the smaller the sigma_c is, and the more sensitive to color intensity difference
+    if nargin<7,win_width = 11;end %奇数容易分配num
+    if nargin<8,thres = 0.5; end   %[0,1]
     num_win = win_width*win_width;
     half_w = (win_width-1)/2;
-    thres = 0.5;
-    g_t = 0;%count the num of changing pixels in mask
+    g_t = 0;                       %count the num of changing pixels in mask
     sigma_precompute = -2*sigma_c*sigma_c;
-    r_start = half_w+1; % round((win_height + 1)/2);  
+    r_start = half_w+1;            % round((win_height + 1)/2);  
     r_end = round(H - half_w-1);
     c_start = half_w+1;     c_end = round(W - half_w-1);
     
