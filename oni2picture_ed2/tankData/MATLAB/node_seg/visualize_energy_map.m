@@ -13,7 +13,7 @@ function visualize_energy_map(pc1, pc2, unique_corr, camera_para)
     if nargin<5, load('relation_pc_dmap_backUp.mat','relation_pc1_dmap'); end
     
     pixelRadius = 20;  %pixel
-    depthRadius = 10;   %mm
+    depthRadius = 10;  %mm
     %%========find (u,v,d) of correspondence pair in depth map========
     validIndex = unique_corr(:,2)>0;  %exclude invalid correspondence
     unique_corr = unique_corr(validIndex,:);  
