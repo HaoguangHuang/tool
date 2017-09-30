@@ -14,7 +14,7 @@ function mask_gbf_c = extractTank_color_ycbcr_Func(fusionedBackgroundData, fusio
         weight_i = zeros(1,1);
         %先执行一次全局的guided_JBF，得到完整的weight_o
         if 1
-        [~, weight_o,~]= guided_JBF(mask_c4d, Y_fg,1,count, weight_i,3,5,0.5);%这里只是计算了weight_o
+        [~, weight_o,~]= guided_JBF(mask_c4d, Y_fg,-1,count, weight_i,3,5,0.5);%这里只是计算了weight_o
         count = count + 1;
         g_thres = 10;%guided thres------per pixel
         g_t = inf;

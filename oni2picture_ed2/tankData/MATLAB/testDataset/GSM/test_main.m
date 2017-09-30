@@ -19,7 +19,7 @@ else
 end
 %%=================foreground substraction===============
 global gt;
-for k = frameStart:3:frameEnd
+for k = 550%frameStart+3:3:frameEnd
 if 1
     gt = imread(['E:\dataSet\ICAISS\GSM\GSM_dataset\GSM\',series,'\','groundTruth\',int2str(k),'.bmp']);
     d_fg = imread([root_dir '\' series '\depthData\depth_' int2str(k) '.png']);

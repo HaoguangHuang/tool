@@ -1,4 +1,5 @@
- function reg_main
+%% REG_MAIN: Registration Main Function 
+function reg_main
     close all;  global debug_mode; debug_mode = 1;
     if nargin < 1, frameNum = 2; end %197-198
     camera_para = struct('fx',504.261,'fy',503.905,'cx',352.457,'cy',272.202);

@@ -17,7 +17,6 @@ function [mask_gbf, weight_o, g_t]= guided_JBF(mask, I, is_ime, count_i, weight,
     G1_vec = reshape(mat2gray(G1_mat), 1, num_win);  win_vec = -half_w:half_w;
 
     weight_o = zeros([H*W,num_win]);
-    
     %%only for count weight_o
     if count_i == 0 %
         for r = r_start : r_end
@@ -40,12 +39,9 @@ function [mask_gbf, weight_o, g_t]= guided_JBF(mask, I, is_ime, count_i, weight,
             for c = c_start : c_end          
                 if mask(r,c)
                     mask_vec = reshape(mask(r+win_vec, c+win_vec), 1, num_win);
-                    
                     weight_vec = weight((r-1)*W+c,:);
-                    
                     res_i = sum(weight_vec.*mask_vec)/sum(weight_vec);
                     mask_gbf(r,c) = res_i;
-                    
                 end
             end
         end
@@ -54,9 +50,7 @@ function [mask_gbf, weight_o, g_t]= guided_JBF(mask, I, is_ime, count_i, weight,
             for c = c_start : c_end          
                 if ~mask(r,c)
                     mask_vec = reshape(mask(r+win_vec, c+win_vec), 1, num_win);
-                   
                     weight_vec = weight((r-1)*W+c,:);
-                    
                     res_i = sum(weight_vec.*mask_vec)/sum(weight_vec);
                     mask_gbf(r,c) = res_i;
                 end
@@ -65,16 +59,20 @@ function [mask_gbf, weight_o, g_t]= guided_JBF(mask, I, is_ime, count_i, weight,
         mask_gbf = (mask_gbf + mask)>0;
         
     else  %is_ime == -1    do all pixels
+        t = zeros(H*W,1);
         for r = r_start : r_end
-            for c = c_start : c_end          
-                    mask_vec = reshape(mask(r+win_vec, c+win_vec), 1, num_win);
-                   
-                    weight_vec = weight((r-1)*W+c,:);
-                    
-                    res_i = sum(weight_vec.*mask_vec)/sum(weight_vec);
-                    mask_gbf(r,c) = res_i; 
+            for c = c_start : c_end
+                tic;
+                mask_vec = reshape(mask(r+win_vec, c+win_vec), 1, num_win);
+                weight_vec = weight((r-1)*W+c,:);
+                res_i = sum(weight_vec.*mask_vec)/sum(weight_vec);
+                mask_gbf(r,c) = res_i;  
+                t((r-1)*W+c) = toc;
             end
-        end
+        end 
+        t = t(t>0);
+        mean_t = mean(t);
+        sum_t = sum(t);
     end
 mask_gbf = mask_gbf>thres;
 Res_I(:,:,1) = mask_gbf*255;
