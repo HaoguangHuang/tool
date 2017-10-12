@@ -1,5 +1,4 @@
-function mask = extractTankFunc(fusionedBackgroundData, fusionedForegroundData,fu_fg_c, k, mask_gbf_c...
-    , mask_file, mask_d4c, series, mask_border)
+function mask = extractTankFunc(fu_bg_d, fu_fg_d, fu_fg_c, k, mask_gbf_c, mask_file, mask_d4c, mask_border)
         global debug_mode;   global gt;
 
         I(:,:,1) = mat2gray(mask_d4c)*255;
@@ -15,12 +14,12 @@ function mask = extractTankFunc(fusionedBackgroundData, fusionedForegroundData,f
         count = 0;%第一次执行
         weight_i = zeros(1,1);
         %先执行一次全局的guided_JBF，得到完整的weight_o
-        [~, weight_o,~]= guided_JBF(mask_d4c, fu_fg_c(:,:,1),1,count, weight_i,2,9,0.35);%这里只是计算了weight_o
+        [~, weight_o,~]= guided_JBF(mask_d4c, fu_fg_c(:,:,1),1,count, weight_i,8,9,0.4);%这里只是计算了weight_o
         count = count + 1;
         g_thres = 10;%guided thres------per pixel
         g_t = inf;
-        while count<20
-            [mask_d4c, ~, g_t] = guided_JBF(mask_d4c, fu_fg_c(:,:,1), -1, count, weight_o,2,9,0.35);%guided imdilate
+        while count<45
+            [mask_d4c, ~, g_t] = guided_JBF(mask_d4c, fu_fg_c(:,:,1), -1, count, weight_o,8,9,0.4);%guided imdilate
             if g_t <= g_thres
                 disp(['frame ',int2str(k), '------------total for ', int2str(count), ' times!']);
                 break;

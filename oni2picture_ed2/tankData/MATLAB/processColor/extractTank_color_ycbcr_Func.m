@@ -1,9 +1,8 @@
-function mask_gbf_c = extractTank_color_ycbcr_Func(fusionedBackgroundData, fusionedForegroundData, k,...
-    mask_d4c, mask_c4d, series, mask_border)
+function mask_gbf_c = extractTank_color_ycbcr_Func(fu_bg_c, fu_fg_c, k, mask_d4c, mask_c4d, mask_border)
     %%ȡmask
         global debug_mode;    global gt;
-        Y_fg = fusionedForegroundData(:,:,1);
-        Y_bg = fusionedBackgroundData(:,:,1);
+        Y_fg = fu_fg_c(:,:,1);
+        Y_bg = fu_bg_c(:,:,1);
 
         if debug_mode, figure(888),imshow(mask_c4d,[]),title('color intensity substract');drawnow; end;
         

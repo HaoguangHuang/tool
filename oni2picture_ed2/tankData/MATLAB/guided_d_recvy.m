@@ -67,16 +67,8 @@ function [recvy_d, weight_o, g_t]= guided_d_recvy(d, I, is_ime, count_i, weight,
             for c = c_start : c_end 
                 %%only process pixel in mask
                 if m(r,c) ~=0 && d(r,c) == 0
-                    d_vec = reshape(d(r+win_vec, c+win_vec), 1, num_win);
-                   
-                    weight_vec = weight((r-1)*W+c,:);
-                    
-                     
-%                     if isempty(d_m)
-%                         res_i = 0;
-%                     else
-%                         res_i = sum(weight_vec(d_m).*d_vec(d_m))/sum(weight_vec(d_m));
-%                     end
+                    d_vec = reshape(d(r+win_vec, c+win_vec), 1, num_win);         
+                    weight_vec = weight((r-1)*W+c,:);    
                     d_m = d_vec >0;
                      s = sum(weight_vec .*d_m);
                      if s == 0   % /s will get NaN
@@ -92,20 +84,19 @@ function [recvy_d, weight_o, g_t]= guided_d_recvy(d, I, is_ime, count_i, weight,
         t = zengliang(zengliang >0);
         recvy_d = recvy_d + d;
     end
-% figure(1), imshow(mat2gray(mask_gbf), 'border', 'tight'), title('grayscale result')
-recvy_d = recvy_d;
+
 Res_I(:,:,1) = recvy_d*255;
 Res_I(:,:,2) = I(:,:,1);
 Res_I(:,:,3) = zeros(H,W);
-figure(4), imshow(uint8(Res_I), 'border', 'tight'), title('after JBF')
-% figure(2), imshow(mask_gbf, 'border', 'tight'), title('after JBF')
+figure(4), imshow(uint8(Res_I)), title('after JBF')
+
 Res_I(:,:,1) = (d>0)*255;
-figure(3), imshow(uint8(Res_I), 'border', 'tight'), title('before JBF')
+figure(3), imshow(uint8(Res_I)), title('before JBF')
   
 Res_I(:,:,1) = zengliang*255;
-figure(16), imshow(uint8(Res_I), 'border', 'tight'), title('zengliang')
+figure(16), imshow(uint8(Res_I)), title('zengliang')
 Res_I(:,:,1) = m*255;
-figure(17), imshow(uint8(Res_I), 'border', 'tight'), title('mask')
+figure(17), imshow(uint8(Res_I)), title('mask')
 g_t = abs(sum(sum(logical(d) - logical(recvy_d))));
 
 

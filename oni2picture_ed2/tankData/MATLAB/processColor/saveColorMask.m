@@ -1,8 +1,8 @@
 function m = saveColorMask(fu_bg_c, fu_fg_c)
-    thres = 55;
+    thres = 85;
     global debug_mode;   global gt;
     Y_fg = fu_fg_c(:,:,1);
-    Y_bg = fu_bg_c;
+    Y_bg = fu_bg_c(:,:,1);
 
     mask1 = abs(double(Y_bg) - double(Y_fg)) > thres;
 %     imwrite(uint8(mask1), [subs_file,'mask',int2str(k),'_c.png']);
