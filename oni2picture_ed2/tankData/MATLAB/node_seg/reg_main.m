@@ -24,7 +24,7 @@ function reg_main
     node_r = [500,250,200,150]/2; %mm. orient to node num = 1,4,8,12
     node_set = cell(1,layers);    %save the node position in every layers 
     for L = 1:layers
-        node_set{L} = pcdownsample(pc{1}, 'gridAverage', node_r(L)*2);%grid size should be 2*r
+        node_set{L} = pcdownsample(pc{1}, 'gridAverage', node_r(L)*2);  %grid size should be 2*r
     end
     %%=============visualize result of node segmentation=============%%
 %     drawNodeSeg(pc,node_r,node_set); drawNodeSeg(pc,node_r*1.25,node_set);
@@ -34,15 +34,14 @@ function reg_main
     
 %% find pointcloud belongs to each node
     node_r_pc1 = node_r*1.25; node_r_pc2 = node_r*1.25*1.1;
-    [pc_set1, pc_set1_node_index]= distrPc(pc{1},node_r_pc1,node_set,layers,1);%distribute pointcloud
+    [pc_set1, pc_set1_node_index]= distrPc(pc{1},node_r_pc1,node_set,layers,1);  %distribute pointcloud
     [pc_set2, ~]= distrPc(pc{2},node_r_pc2,node_set,layers,2);
     
 %% node ICP
     [Tmat, rmse]= hierarchical_ICP(pc_set1,pc_set2,layers, node_tree);
     this_file = 'E:\Code\vs2010\oni2picture_ed2\oni2picture_ed2\tankData\MATLAB\node_seg\';
     if 0 %debug_mode 
-    save([this_file,'Tmat_wc03.mat'],'Tmat');
-    save([this_file,'rmse_wc03.mat'],'rmse');
+    save([this_file,'Tmat_wc03.mat'],'Tmat');  save([this_file,'rmse_wc03.mat'],'rmse');
     analyseTmat(Tmat);%visualize rotation angle and translation
     end
     
@@ -57,7 +56,7 @@ function reg_main
     visualize_energy_map(pc{1}, pc{2}, corrIndex, camera_para);
     
 %% sparse2dense,∞—sparse unique correspondence point cloud≤Â÷µ≥…dense point cloud
-    denseMap2 = sparse2dense(pc{1}, D{2}, corrIndex, camera_para, Yuv{1},Yuv{2});
+    denseMap2 = sparse2dense(pc{1}, pc{2}, corrIndex, camera_para, Tmat, pc_bestNode_distr);
  end
 
  
