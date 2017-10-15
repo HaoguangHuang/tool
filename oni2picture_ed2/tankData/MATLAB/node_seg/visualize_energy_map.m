@@ -19,7 +19,7 @@ function visualize_energy_map(pc1, pc2, unique_corr, camera_para)
     unique_corr = unique_corr(validIndex,:);  
     xyz_pc1 = select(pc1, unique_corr(:,1));  xyz_pc1 = xyz_pc1.Location(:,:);
     xyz_pc2 = select(pc2, unique_corr(:,2));  xyz_pc2 = xyz_pc2.Location(:,:);
-    %这里其实应该是vud_pc比较合适
+    
     vud_pc1 = transformXYZ2UVD(xyz_pc1, camera_para);
     vud_pc2 = transformXYZ2UVD(xyz_pc2, camera_para);
     %%========construct energy map========

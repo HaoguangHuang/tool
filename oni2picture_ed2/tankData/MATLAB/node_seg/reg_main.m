@@ -53,8 +53,11 @@ function reg_main
     corrIndex = find_unique_corr(pc_bestNode_distr, pc{1}, pc{2}, Tmat{layers}, thres_corr);
 %% visualize pc1 in coordinate of pc2 with unique correspondence transformation
     if debug_mode, visualize_with_corr(pc{1}, pc{2}, corrIndex, Tmat{layers},pc_bestNode_distr); end
-    
+%% 可视化optical flow map，观察unique_correspondence找得对不对    
     visualize_energy_map(pc{1}, pc{2}, corrIndex, camera_para);
+    
+%% sparse2dense,把sparse unique correspondence point cloud插值成dense point cloud
+    denseMap2 = sparse2dense(pc{1}, D{2}, corrIndex, camera_para, Yuv{1},Yuv{2});
  end
 
  
