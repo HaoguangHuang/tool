@@ -14,12 +14,14 @@ function mask = extractTankFunc(fu_bg_d, fu_fg_d, fu_fg_c, k, mask_gbf_c, mask_f
         count = 0;%第一次执行
         weight_i = zeros(1,1);
         %先执行一次全局的guided_JBF，得到完整的weight_o
-        [~, weight_o,~]= guided_JBF(mask_d4c, fu_fg_c(:,:,1),1,count, weight_i,8,9,0.4);%这里只是计算了weight_o
+%         [~, weight_o,~]= guided_JBF(mask_d4c, fu_fg_c(:,:,1),1,count, weight_i,8,9,0.45);%这里只是计算了weight_o
+        [~, weight_o,~,weight_s]= guided_JBF_opt(mask_d4c, fu_fg_c(:,:,1),1,count, weight_i,15,11,0.45);          
         count = count + 1;
-        g_thres = 10;%guided thres------per pixel
+        g_thres = 0;%guided thres------per pixel
         g_t = inf;
-        while count<45
-            [mask_d4c, ~, g_t] = guided_JBF(mask_d4c, fu_fg_c(:,:,1), -1, count, weight_o,8,9,0.4);%guided imdilate
+        while count<20 %&& g_t > g_thres
+%             [mask_d4c, ~, g_t] = guided_JBF(mask_d4c, fu_fg_c(:,:,1), -1, count, weight_o,8,9,0.45);%guided imdilate
+            [mask_d4c, ~, g_t,~] = guided_JBF_opt(mask_d4c, fu_fg_c(:,:,1), -1, count, weight_o,15,11,0.45,weight_s);            
             if g_t <= g_thres
                 disp(['frame ',int2str(k), '------------total for ', int2str(count), ' times!']);
                 break;

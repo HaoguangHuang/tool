@@ -10,9 +10,9 @@ function visualize_energy_map(pc1, pc2, unique_corr, camera_para)
         unique_corr = corrIndex_wc03_thres2;  clear corrIndex_wc03_thres2; 
     end
     if nargin<4, camera_para = struct('fx',504.261,'fy',503.905,'cx',352.457,'cy',272.202); end
-    if nargin<5, load('relation_pc_dmap_backUp.mat','relation_pc1_dmap'); end
+%     if nargin<5, load('relation_pc_dmap_backUp.mat','relation_pc1_dmap'); end
     
-    pixelRadius = 4;  %pixel
+    pixelRadius = 2;  %pixel
     depthRadius = 6;  %mm
     %%========find (u,v,d) of correspondence pair in depth map========
     validIndex = unique_corr(:,2)>0;  %exclude invalid correspondence
@@ -27,10 +27,10 @@ function visualize_energy_map(pc1, pc2, unique_corr, camera_para)
     delta_u = vud_pc1(:,2) - vud_pc2(:,2);
     delta_d = vud_pc1(:,3) - vud_pc2(:,3);
     
-    getEnergyMap_all_without_direction(delta_u, delta_v, delta_d, vud_pc1, unique_corr, pixelRadius, depthRadius);
-    getEnergyMap_with_direction(delta_u, vud_pc1, unique_corr, pixelRadius, 'delta\_u');
-    getEnergyMap_with_direction(delta_v, vud_pc1, unique_corr, pixelRadius, 'delta\_v');
-    getEnergyMap_with_direction(delta_d, vud_pc1, unique_corr, depthRadius, 'delta\_d');
+%     getEnergyMap_all_without_direction(delta_u, delta_v, delta_d, vud_pc1, unique_corr, pixelRadius, depthRadius);
+%     getEnergyMap_with_direction(delta_u, vud_pc1, unique_corr, pixelRadius, 'delta\_u');
+%     getEnergyMap_with_direction(delta_v, vud_pc1, unique_corr, pixelRadius, 'delta\_v');
+%     getEnergyMap_with_direction(delta_d, vud_pc1, unique_corr, depthRadius, 'delta\_d');
     get_optical_flow_map_with_uv(delta_u, delta_v, vud_pc1, unique_corr, pixelRadius);
 end
 

@@ -27,7 +27,7 @@ D = imread([Folder_Name '/' D_FolderName '/' d_fname(idx(1)).name]);  [H, W] = s
 color_BG = zeros(H, W); depth_BG = color_BG; cnt_map = color_BG;
 % num_px = H*W;  mat_Y = zeros(num_px, 60);  mat_D = mat_Y;
 count = 1;
-for i=0:60  % use 60 frames for 'ColCamSeq'/ 'DCamSeq' / 'GenSeq' / 'ShSeq'
+for i=70:130  % use 60 frames for 'ColCamSeq'/ 'DCamSeq' / 'GenSeq' / 'ShSeq'
     % --------------------- color BG ---------------------
     I = imread([Folder_Name '/' RGB_FolderName '/img_', int2str(i),'.Jpeg']);
     yuv_I = rgb2ycbcr(I);

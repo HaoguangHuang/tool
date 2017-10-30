@@ -4,7 +4,7 @@
 %               corrIndex:array.       Its size is pc1.Count*3. [p1, corresponedence in pc2, dist]
 %                    tmat:cell.        Record ICP result in the last layers. Element is a cell containing an affine3d object
 %       pc_bestNode_distr:array.       pc1.Count*1. Record which node have best connection with point in pc1 
-% Note: Here we only visualize the point in pc1 having unique correspondence 
+% Note: Here we only visualize the point in pc1 having unique correspondence via a series of line segment 
 function visualize_with_corr(pc1, pc2, corrIndex, tmat, pc_bestNode_distr)
     if nargin < 1, load('pc.mat','pc_197'); pc1 = pc_197; end
     if nargin < 2, load('pc.mat','pc_198'); pc2 = pc_198; end

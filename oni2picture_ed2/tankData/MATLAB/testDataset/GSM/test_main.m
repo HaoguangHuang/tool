@@ -3,8 +3,8 @@
 
 % clear all; close all;
 warning('off');   
-global debug_mode;  debug_mode = 0;  
-series = 'TimeOfDay_ds'; root_dir = 'E:\dataSet\ICAISS\GSM\GSM_dataset\GSM\';
+global debug_mode;  debug_mode = 1;  
+series = 'Cespatx_ds'; root_dir = 'E:\dataSet\ICASSP\GSM\GSM_dataset\GSM\';
 frameStart = 110; frameEnd = 1220;
 %%==================background fusion==================
 if 0
@@ -19,18 +19,19 @@ else
 end
 %%=================foreground substraction===============
 global gt;
-for k = 550%frameStart+3:3:frameEnd
+mask_border = ones(size(d_bg));
+for k = 195%frameStart+3:3:frameEnd
 if 1
-    gt = imread(['E:\dataSet\ICAISS\GSM\GSM_dataset\GSM\',series,'\','groundTruth\',int2str(k),'.bmp']);
+    gt = imread(['E:\dataSet\ICASSP\GSM\GSM_dataset\GSM\',series,'\','groundTruth\',int2str(k),'.bmp']);
     d_fg = imread([root_dir '\' series '\depthData\depth_' int2str(k) '.png']);
     c_fg = imread([root_dir '\' series '\ycbcrData\ycbcr_color_' int2str(k) '.png']);
     output_file = [root_dir '\' series '\output\'];
-    mask_d4c = saveDepthMask(d_bg, d_fg, k, [], c_fg, series);
+    mask_d4c = saveDepthMask(d_bg, d_fg, k, [], c_fg);
     mask_c4d = saveColorMask(c_bg, c_fg);
    
     %%======process ycbcr map======%%
     if 1
-        mask_gbf_c = extractTank_color_ycbcr_Func(c_bg, c_fg, k, mask_d4c, mask_c4d, series);
+        mask_gbf_c = extractTank_color_ycbcr_Func(c_bg, c_fg, k, mask_d4c, mask_c4d, mask_border);
     end
 else
     load('mask_gbf_c.mat',[series, '_mask_gbf_c']); eval(['mask_gbf_c = ',series,'_mask_gbf_c']);
@@ -38,7 +39,7 @@ end
 
 if 1
     %%======process depth map======%%
-    mask = extractTankFunc(d_bg, d_fg, c_fg, k, mask_gbf_c, output_file, mask_d4c, series);
+    mask = extractTankFunc(d_bg, d_fg, c_fg, k, mask_gbf_c, output_file, mask_d4c, mask_border);
     %%======compare with gt=======%%
     if debug_mode
     I(:,:,1) = mat2gray(mask)*255; I(:,:,2) = mat2gray(gt)*255; I(:,:,3) = zeros(size(gt));

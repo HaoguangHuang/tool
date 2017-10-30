@@ -15,7 +15,7 @@ if nargin<1, Folder_Name = 'ShSeq'; end
 if nargin<2, D_FolderName = 'depthData'; end
 if nargin<3, RGB_FolderName = 'colorData'; end
 if nargin<4, depth_ext = 'png'; end    % for 'stereoSeq', depth_ext = 'bmp'; 
-if nargin<5, color_ext = 'jpeg'; end   % for 'stereoSeq', color_ext = 'bmp'; 
+if nargin<5, color_ext = 'Jpeg'; end   % for 'stereoSeq', color_ext = 'bmp'; 
 global debug_mode;
 
 rgb_fname = dir([Folder_Name '/' RGB_FolderName '/*.' color_ext]);
@@ -25,20 +25,26 @@ d_fname = dir([Folder_Name '/' D_FolderName '/*.' depth_ext]);
 D = imread([Folder_Name '/' D_FolderName '/' d_fname(idx(1)).name]);  [H, W] = size(D);
 color_BG = zeros(H, W); depth_BG = color_BG; cnt_map = color_BG;
 % num_px = H*W;  mat_Y = zeros(num_px, 60);  mat_D = mat_Y;
+t_c = zeros(1,60); t_d = zeros(1,60);
 for i=1:60  % use 60 frames for 'ColCamSeq'/ 'DCamSeq' / 'GenSeq' / 'ShSeq'
     % --------------------- color BG ---------------------
     I = imread([Folder_Name '/' RGB_FolderName '/' rgb_fname(idx(i)).name]);
     yuv_I = rgb2ycbcr(I);
     if debug_mode, figure(10), imshow(yuv_I(:,:,1)), title(num2str(i)), drawnow, end
+    tic;
     color_BG = (color_BG*(i-1) + double(yuv_I(:,:,1))) / i;
+    t_c(i) = toc;
 %     mat_Y(:,i) = reshape(double(yuv_I(:,:,1)), num_px, 1);
     % --------------------- depth BG --------------------- 
     D = imread([Folder_Name '/' D_FolderName '/' d_fname(idx(i)).name]);
 %     mat_D(:,i) = reshape(double(D), num_px, 1);
     mask_D = D>0;
+    tic;
     cnt_map = cnt_map + double(mask_D);
     depth_BG(mask_D) = (depth_BG(mask_D).*(cnt_map(mask_D)-1) + double(D(mask_D))) ./ cnt_map(mask_D);
+    t_d(i) = toc;
 end
+disp(['color background ']);
 if debug_mode, figure(2), imshow(uint8(depth_BG/4096*255)), end
 if debug_mode, figure(1), imshow(uint8(color_BG)), end
 % [L_d, S_d] = SSGoDec(mat_D, 1, 30, 2, 100);   depth_BG = reshape(L_d(:,1), H, W);
