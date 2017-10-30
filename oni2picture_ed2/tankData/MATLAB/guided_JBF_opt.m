@@ -75,14 +75,12 @@ function [mask_gbf, weight_o, g_t, weight_s]= guided_JBF_opt(mask, I, is_ime, co
         t = zeros(6,H*W); 
         for r = r_start : r_end
             for c = c_start : c_end          
-%                 tic; mask_vec = mask(r+win_vec, c+win_vec); t(1,(r-1)*W+c) = toc;
                 tic; mask_vec = mask_gbf(r+win_vec, c+win_vec); t(1,(r-1)*W+c) = toc;
                 tic; if ~mask_vec, mask_gbf(r,c) = 0; continue; end; t(2,(r-1)*W+c) = toc;
                 tic; if sum(sum(mask_vec))==num_win, mask_gbf(r,c) = 1; continue; end; t(3,(r-1)*W+c) = toc;
                 tic; weight_vec = weight(:,:,(r-1)*W+c); t(4,(r-1)*W+c) = toc;
                 tic; res_i = sum(sum(weight_vec.*mask_vec))/weight_sum((r-1)*W+c); t(5,(r-1)*W+c) = toc;
                 tic; mask_gbf(r,c) = res_i>thres; t(6,(r-1)*W+c) = toc;    
-%                 figure(5),imshow(mask_gbf,[]);
             end
         end 
         disp(['t1 = ',num2str(sum(t(1,:)))]);
@@ -91,6 +89,7 @@ function [mask_gbf, weight_o, g_t, weight_s]= guided_JBF_opt(mask, I, is_ime, co
         disp(['t4 = ',num2str(sum(t(4,:)))]);
         disp(['t5 = ',num2str(sum(t(5,:)))]);
         disp(['t6 = ',num2str(sum(t(6,:)))]);
+
 %         disp(['reshape time = ',num2str(sum(t))]);
 %         disp(['count_zero = ',int2str(count_zero)]);
 %         disp(['count_one = ',int2str(count_one)]);
