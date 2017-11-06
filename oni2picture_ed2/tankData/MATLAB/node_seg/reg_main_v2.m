@@ -1,5 +1,5 @@
-%% REG_MAIN: Registration Main Function 
-function reg_main
+%% REG_MAIN_v2: Registration Main Function 
+function reg_main_v2
     close all;  global debug_mode; debug_mode = 1;
     if nargin < 1, frameNum = 2; end %197-198
     camera_para = struct('fx',504.261,'fy',503.905,'cx',352.457,'cy',272.202);
@@ -34,14 +34,15 @@ function reg_main
     
 %% find pointcloud belongs to each node
     node_r_pc1 = node_r*1.25; node_r_pc2 = node_r*1.25*1.1;
-    [pc_set1, pc_set1_node_index]= distrPc(pc{1},node_r_pc1,node_set,layers,1);  %distribute pointcloud
-    [pc_set2, ~]= distrPc(pc{2},node_r_pc2,node_set,layers,2);
+    [pc_set1, pc_set1_node_index]= distr_pc(pc{1},node_r_pc1,node_set,layers,1);  %distribute pointcloud
+    [pc_set2, ~]= distr_pc(pc{2},node_r_pc2,node_set,layers,2);
     
 %% node ICP
     [Tmat, rmse]= hierarchical_ICP(pc_set1,pc_set2,layers, node_tree);
     this_file = 'E:\Code\vs2010\oni2picture_ed2\oni2picture_ed2\tankData\MATLAB\node_seg\';
     if 0 %debug_mode 
-    save([this_file,'Tmat_wc03.mat'],'Tmat');  save([this_file,'rmse_wc03.mat'],'rmse');
+    save([this_file,'Tmat_wc03.mat'],'Tmat','-append');  
+    save([this_file,'rmse_wc03.mat'],'rmse','-append');
     analyseTmat(Tmat);%visualize rotation angle and translation
     end
     
@@ -109,7 +110,7 @@ end
 % pc_node_index: pc.Count*node_set{4}.Count array. Record the relation
 %                between pointcloud and nodes in layer 4. If point 1 
 %                and node 4 connect, then pc_node_index(1,4)=1; 
-function [pc_set, pc_node_index]= distrPc(pc,leaf_size,node_set,layers,flag)
+function [pc_set, pc_node_index]= distr_pc(pc,leaf_size,node_set,layers,flag)
     global debug_mode;
     pc_set = cell(1,layers);
 %     pc.Color = repmat(uint8([0,255,0]),pc.Count,1);

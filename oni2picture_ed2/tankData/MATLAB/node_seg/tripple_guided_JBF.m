@@ -4,12 +4,13 @@
 %  Y1:480*640. pc1中拥有unique correspondence的点的2D投影图uvY.
 %  Y2:480*640. pc2的点的2D投影图uvY
 %mask:480*640. 需要被插值出pc1的corr的像素点集合
+%mask_idx_map: 480*640. 每个像素点的值为该点对应pc1中corr的index
+%addMap_idx_map:D2中插值出来的corr点的pc1
 %  Note: 注意得到的dense map，只包含uvd几何信息，并不包括intensity
-function denseMap2 = tripple_guided_JBF(D1, D2, Y1, Y2, mask)
+function [denseMap2, addMap_idx_map] = tripple_guided_JBF(D1, D2, Y1, Y2, mask, mask_idx_map)
     [H, W] = size(D2);
     denseMap2 = D2;
     sigma_c = 8;  win_width = 7;  %win_width必须是奇数  
-    thres = 0;  %mm
     num_win = win_width * win_width;
     half_w = (win_width - 1) / 2;
     sigma_precompute = -2 * sigma_c * sigma_c;
@@ -20,12 +21,12 @@ function denseMap2 = tripple_guided_JBF(D1, D2, Y1, Y2, mask)
     G1_vec = reshape(mat2gray(G1_mat), 1, num_win);
     win_vec = -half_w:half_w;
     addMap = zeros(H,W);  %记录通过插值得到的点
-    
+    addMap_idx_map = zeros(H,W);
     %%只操作mask中的点
     count = 0;
     for r = r_start : r_end
         for c = c_start : c_end
-            if mask(r,c) ~= 0
+            if mask(r,c) ~= 0 
             depth_patch = reshape(D1(r+win_vec, c+win_vec), 1, num_win);
             depth_i = ones(1, num_win)*D2(r,c);
             depth_vec = exp((depth_i - depth_patch).^2/sigma_precompute);%固定值，可以保存下来
@@ -40,6 +41,8 @@ function denseMap2 = tripple_guided_JBF(D1, D2, Y1, Y2, mask)
             
             index = mask_vec > 0;
             res_i = sum(weight_vec(index).*mask_vec(index))/sum(weight_vec(index));
+            if isnan(res_i), continue; end;
+            addMap_idx_map(r,c) = mask_idx_map(r,c);
             denseMap2(r,c) = res_i;
             count = count + 1; 
             addMap(r,c) = res_i;
