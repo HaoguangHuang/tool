@@ -1,24 +1,24 @@
 %% SPARSE2DENSE_V3
-%======JTF²åÍ¼¶şÖĞÓĞÉî¶ÈÖµµ«Ã»ÓĞunique_corrµÄµãµÄtransformation=====
-% ÒÔµÚÒ»Ö¡Í¼Îªguidance£¬ÔÚÍ¼¶şÖĞ²åÖµ³öÓĞÉî¶ÈÖµµ«Ã»ÓĞunique_corrµÄµãµÄtransformation
-%         pc1:pointCloud.      guidanceµãÔÆ£¬ĞèÒªÏÈ×ªµ½pc2µÄ×ø±ê£¬È»ºó´Ó3DÍ¶Ó°µ½2DÏà»úÆ½Ãæ
-%         pc2:pointCloud.      ±»²Ù×÷µÄµãÔÆ£¬ĞèÒª´Ó3DÍ¶Ó°µ½2DÏà»úÆ½Ãæ
+%======JTF:interpolate transformation of points from pc2, which have depth value but no unique_corr=====
+% ä»¥ç¬¬ä¸€å¸§å›¾ä¸ºguidanceï¼Œåœ¨å›¾äºŒä¸­æ’å€¼å‡ºæœ‰æ·±åº¦å€¼ä½†æ²¡æœ‰unique_corrçš„ç‚¹çš„transformation
+%         pc1:pointCloud.      guidance pc. Needed to be transformed into coo of pc2, then project from 3D to 2D
+%         pc2:pointCloud.      operated pc. Needed to be project from 3D to 2D
 % point_corr:pc1.Count*3.     [indice, correspondence, dist]
 % camera_para:struct.          containing fx, fy, cx, cy
 %        Tmat:cell.            save ICP result of each node in each layers
-% pc_bestNode_distr: array.    n*1.  ¼ÇÂ¼Ã¿¸öpoint¹éÊôµÄ×î¼ÑnodeÊÇÄÄ¸ö
-% transformationMap£º480*640*6. µãÊıÓëpc2µÄ2DÍ¶Ó°Í¼Ò»Ñù£¬µ«Ã¿¸öÏñËØµãµÄÖµÎªtransfomation¡£[¦Á,¦Â£¬¦Ã£¬t1,t2,t3]
+% pc_bestNode_distr: array.    n*1.  record the best related node of each point in pc1
+% transformationMap:480*640*6. point number equals to pc2. [Î±,Î²ï¼ŒÎ³,t1,t2,t3]
 %
-% Note:Ë¼Â·ÊÇÒÔÍ¼Ò»Îªguidance£¬²Ù×÷Í¼¶ş£¬½øĞĞÈı±ßguided JBF¡£²½ÖèÈçÏÂ£º
-%      1.pc1ÖĞÓĞunique_corrµÄµã£¬transformµ½pc2×ø±êÉÏ.µÃµ½D1,Y1,transformationMap1
-%      2.pc2ÖĞÓĞunique_corrµÄµã£¬Í¶Ó°µÃµ½D2, Y2, transformationMap2,mask2
-%      3.pc2ÖĞËùÓĞµã£¬Í¶Ó°µÃµ½D3,Y3,transformationMap3,mask3
-%      4.mask = (~mask2) & mask3. ºóĞø²Ù×÷mask==1µÄµã£¬´Ë´¦²»¿¼ÂÇz-buffer
-%      3.tripple_filterÖĞ£¬Ö»¶Ô·½ĞÎ´°¿ÚÖĞdepth~=0µÄÉî¶Èµã½øĞĞ¼ÓÈ¨Æ½¾ù¡£´Ë´¦ÒªÇóËùÓĞmask==1µÄÏñËØµã¶¼Òª»ñµÃtransformation
+% Note:æ€è·¯æ˜¯ä»¥å›¾ä¸€ä¸ºguidanceï¼Œæ“ä½œå›¾äºŒï¼Œè¿›è¡Œä¸‰è¾¹guided JBFã€‚æ­¥éª¤å¦‚ä¸‹ï¼š
+%      1.pc1ä¸­æœ‰unique_corrçš„ç‚¹ï¼Œtransformåˆ°pc2åæ ‡ä¸Š.å¾—åˆ°D1,Y1,transformationMap1
+%      2.pc2ä¸­æœ‰unique_corrçš„ç‚¹ï¼ŒæŠ•å½±å¾—åˆ°D2, Y2, transformationMap2,mask2
+%      3.pc2ä¸­æ‰€æœ‰ç‚¹ï¼ŒæŠ•å½±å¾—åˆ°D3,Y3,transformationMap3,mask3
+%      4.mask = (~mask2) & mask3. åç»­æ“ä½œmask==1çš„ç‚¹ï¼Œæ­¤å¤„ä¸è€ƒè™‘z-buffer
+%      3.tripple_filterä¸­ï¼Œåªå¯¹æ–¹å½¢çª—å£ä¸­depth~=0çš„æ·±åº¦ç‚¹è¿›è¡ŒåŠ æƒå¹³å‡ã€‚æ­¤å¤„è¦æ±‚æ‰€æœ‰mask==1çš„åƒç´ ç‚¹éƒ½è¦è·å¾—transformation
 %      tripple_filter
-%      a) µÚÒ»Ö¡Í¼ÖĞµÄÄ³µã i (¸Ãµã²»ÓµÓĞunique_correspondence)×÷ÎªÖĞĞÄ£¬ ÒÔwidthÎª±ß³¤¹¹Ôì·½ĞÎ´°¿Ú
-%      b) ´°¿ÚÖĞÏñËØµãµÄÈ¨ÖµÎª: w = w_intensity * w_distance * w_depth
-%      c) µã i µÄ[¦Á,¦Â£¬¦Ã£¬t1,t2,t3]Îª t_i = ¦²¦Á_j * t_j / ¦²¦Á_j
+%      a) ç¬¬ä¸€å¸§å›¾ä¸­çš„æŸç‚¹ i (è¯¥ç‚¹ä¸æ‹¥æœ‰unique_correspondence)ä½œä¸ºä¸­å¿ƒï¼Œ ä»¥widthä¸ºè¾¹é•¿æ„é€ æ–¹å½¢çª—å£
+%      b) çª—å£ä¸­åƒç´ ç‚¹çš„æƒå€¼ä¸º: w = w_intensity * w_distance * w_depth
+%      c) ç‚¹ i çš„[Î±,Î²ï¼ŒÎ³ï¼Œt1,t2,t3]ä¸º t_i = Î£Î±_j * t_j / Î£Î±_j
 
 function transformationMap = sparse2dense_v3(pc1, pc2, point_corr, camera_para, Tmat, pc_bestNode_distr)
     addpath(genpath('E:\matlab_thirdparty_lib'));
@@ -32,62 +32,46 @@ function transformationMap = sparse2dense_v3(pc1, pc2, point_corr, camera_para, 
     if nargin < 6, load('pc_bestNode_distr.mat');
         pc_bestNode_distr = pc_bestNode_distr_wc03; clear pc_bestNode_distr_wc03; 
     end
-    %%======°Ñpc1µÄunique_corrÍ¶Ó°µ½pc2=======
+    %%======æŠŠpc1çš„unique_corræŠ•å½±åˆ°pc2=======
     pc1_inCoo2 = transform_pc1_into_coordinate_of_pc2(pc1, Tmat, pc_bestNode_distr);
     
-    %%======Í¶Ó°¾­¹ıPOIÂË²¨µÄpc1_inCoo2µ½Ïà»úÆ½Ãæ======
+    %%======æŠ•å½±ç»è¿‡POIæ»¤æ³¢çš„pc1_inCoo2åˆ°ç›¸æœºå¹³é¢======
     unique_corr = point_corr(point_corr(:,2)>0,:);
     not_unique_corr = point_corr(point_corr(:,2)==0,:);
      
     xyz_pc1 = select(pc1_inCoo2, unique_corr(:,1));  %20342  
     y_pc1 = xyz_pc1.Color(:,1); xyzidx_pc1 = [xyz_pc1.Location(:,:), unique_corr(:,1)]; 
-    %D1:pc1_inCoo2ÖĞËùÓĞÓµÓĞunique_correspondenceµÄµãµÄÍ¶Ó°uvd. guidance
-    %Y1:pc1_inCoo2ÖĞËùÓĞÓµÓĞunique_correspondenceµÄµãµÄÍ¶Ó°uvY
-    %transformationMap1:480*640*3. ¼ÇÂ¼Ã¿¸öÏñËØµãµÄ
+    %D1:pc1_inCoo2ä¸­æ‰€æœ‰æ‹¥æœ‰unique_correspondenceçš„ç‚¹çš„æŠ•å½±uvd. guidance
+    %Y1:pc1_inCoo2ä¸­æ‰€æœ‰æ‹¥æœ‰unique_correspondenceçš„ç‚¹çš„æŠ•å½±uvY
+    %transformationMap1:480*640*3. è®°å½•æ¯ä¸ªåƒç´ ç‚¹çš„
     [~, D1, Y1, idx_map1]= transformXYZ2UVDI(xyzidx_pc1, camera_para, y_pc1, unique_corr);
     transformationMap1 = idx_to_transformation(idx_map1, pc_bestNode_distr, Tmat);
     
-    %D2:pointCloud2ÖĞËùÓĞÓµÓĞunique_correspondenceµÄµãµÄÍ¶Ó°uvd
-    %Y2:pointCloud2ÖĞËùÓĞÓµÓĞunique_correspondenceµÄµãµÄÍ¶Ó°uvY
-    %idx_map2:¼ÇÂ¼D2ÖĞÍ¶Ó°µã(¶¼ÓĞunique_corr)ÔÚpc1ÖĞµÄ¶ÔÓ¦corr
+    %D2:pointCloud2ä¸­æ‰€æœ‰æ‹¥æœ‰unique_correspondenceçš„ç‚¹çš„æŠ•å½±uvd
+    %Y2:pointCloud2ä¸­æ‰€æœ‰æ‹¥æœ‰unique_correspondenceçš„ç‚¹çš„æŠ•å½±uvY
+    %idx_map2:è®°å½•D2ä¸­æŠ•å½±ç‚¹(éƒ½æœ‰unique_corr)åœ¨pc1ä¸­çš„å¯¹åº”corr
     xyz_pc2 = select(pc2,unique_corr(:,2));
     y_pc2 = xyz_pc2.Color(:,1); xyzidx_pc2 = [xyz_pc2.Location(:,:), unique_corr(:,2)];
     [~, D2, ~, idx_map2]= transformXYZ2UVDI(xyzidx_pc2, camera_para, y_pc2, unique_corr);
     mask2 = D2 > 0;
     transformationMap2 = idx_to_transformation(idx_map2, pc_bestNode_distr, Tmat);
     
-    %D3:pointCloud2ÖĞËùÓĞµãµÄÍ¶Ó°uvd
-    %Y3:pointCloud2ÖĞËùÓĞµãµÄÍ¶Ó°uvY
+    %D3:pointCloud2ä¸­æ‰€æœ‰ç‚¹çš„æŠ•å½±uvd
+    %Y3:pointCloud2ä¸­æ‰€æœ‰ç‚¹çš„æŠ•å½±uvY
     xyz_pc3 = pc2;
     y_pc3 = xyz_pc3.Color(:,1); xyzidx_pc3 = [xyz_pc3.Location(:,:), zeros(pc2.Count,1)];
     [~, D3, Y3, ~]= transformXYZ2UVDI(xyzidx_pc3, camera_para, y_pc3, zeros(pc2.Count,1));
     mask3 = D3 > 0;
     
-    %mask>0µÄµãÊÇÒªtripple_filter´¦ÀíµÄµã
+    %mask>0çš„ç‚¹æ˜¯è¦tripple_filterå¤„ç†çš„ç‚¹
     mask = mask3 & (~mask2);
     
-    %°Ñidx_map2×ª³ÉtransformationMap2
+    %æŠŠidx_map2è½¬æˆtransformationMap2
    transformationMap2 = idx_to_transformation(idx_map2, pc_bestNode_distr, Tmat);
     
    transformationMap = tripple_guided_JBF_v3(D1, D3, Y1, Y3, mask, transformationMap1, transformationMap2);
    
     
-    %%======ºÏ²¢addMap_idx_mapºÍidx_map2¡£======
-    %ºÏ²¢·¢ÉúÏñËØÖØµşµÄ»°£¬idx_map2µÄÓÅÏÈ¼¶¸ßÓÚaddMap
-%     if sum(sum((addMap_idx_map>0)&(idx_map2>0)))~=0, error('idx_map && addMap ~= 0');end  %¼ì²éÊÇ·ñÓĞÏñËØÖØµş
-%     idx_map2 = addMap_idx_map + idx_map2;
-    
-    %¼ì²éidx_mapÖĞµÄµãÊÇ·ñ¶¼ÓĞpc_best_Node¡ª¡ªÃ»ÎÊÌâ
-%     load('test.mat','idx_map');
-%     idx_map = int16(idx_map);
-%     for r = 1:480
-%         for c = 1:640
-%             if idx_map(r,c) == 0, continue; end
-%             if pc_bestNode_distr(idx_map(r,c)) ~= 0
-%                 disp(['r=',num2str(r),', c=',num2str(c)]);
-%             end
-%         end
-%     end
 end
 
 
@@ -126,7 +110,7 @@ function pc1_inCoo2 = transform_pc1_into_coordinate_of_pc2(pc1, Tmat, pc_bestNod
 end
 
 function transformationMap = idx_to_transformation(idx_map, pc_bestNode_distr, Tmat)
-    %===ÏÈ°ÑTmat{4}×ª³É[¦Á,¦Â£¬¦Ã£¬t1,t2,t3]
+    %===å…ˆæŠŠTmat{4}è½¬æˆ[Î±,Î²ï¼ŒÎ³ï¼Œt1,t2,t3]
     Tmat_6DoF = zeros(size(Tmat{4},2),1);
     for i = 1:size(Tmat_6DoF)
         T = Tmat{4}{i}.T;
@@ -134,7 +118,7 @@ function transformationMap = idx_to_transformation(idx_map, pc_bestNode_distr, T
         Tmat_6DoF(i,1:3) = rodrigues(R);
         Tmat_6DoF(i,4:6) = t;
     end
-    transformationMap = zeros(480,640,6);  %[¦Á,¦Â£¬¦Ã£¬t1,t2,t3]
+    transformationMap = zeros(480,640,6);  %[Î±,Î²ï¼ŒÎ³ï¼Œt1,t2,t3]
     for r = 1:480
         for c = 1:640
             idx = idx_map(r,c);
