@@ -35,10 +35,16 @@ function transformationMap = sparse2dense_v3(pc1, pc2, point_corr, camera_para, 
     %%======把pc1的unique_corr投影到pc2=======
     pc1_inCoo2 = transform_pc1_into_coordinate_of_pc2(pc1, Tmat, pc_bestNode_distr);
     
+    
+    
     %%======投影经过POI滤波的pc1_inCoo2到相机平面======
     unique_corr = point_corr(point_corr(:,2)>0,:);
     not_unique_corr = point_corr(point_corr(:,2)==0,:);
      
+    %======transform pc2 into coo of pc1======
+    test(pc2, Tmat, pc_bestNode_distr,unique_corr);
+    
+    
     xyz_pc1 = select(pc1_inCoo2, unique_corr(:,1));  %20342  
     y_pc1 = xyz_pc1.Color(:,1); xyzidx_pc1 = [xyz_pc1.Location(:,:), unique_corr(:,1)]; 
     %D1:pc1_inCoo2中所有拥有unique_correspondence的点的投影uvd. guidance
@@ -54,7 +60,6 @@ function transformationMap = sparse2dense_v3(pc1, pc2, point_corr, camera_para, 
     y_pc2 = xyz_pc2.Color(:,1); xyzidx_pc2 = [xyz_pc2.Location(:,:), unique_corr(:,2)];
     [~, D2, ~, idx_map2]= transformXYZ2UVDI(xyzidx_pc2, camera_para, y_pc2, unique_corr);
     mask2 = D2 > 0;
-    transformationMap2 = idx_to_transformation(idx_map2, pc_bestNode_distr, Tmat);
     
     %D3:pointCloud2中所有点的投影uvd
     %Y3:pointCloud2中所有点的投影uvY
@@ -99,22 +104,33 @@ end
 function pc1_inCoo2 = transform_pc1_into_coordinate_of_pc2(pc1, Tmat, pc_bestNode_distr)
     xyz_pc1_inCoo2 = zeros(pc1.Count,3);
     for i = 1:pc1.Count
-        if pc_bestNode_distr(i,1) == 0, continue; end;  %exclude the poins that belonging to no node 
+        if pc_bestNode_distr(i,1) == 0, continue; end  %exclude the poins that belonging to no node 
         p = pc1.Location(i,:);
         T = Tmat{4}{pc_bestNode_distr(i,1)};
         p_afterTran = transformPointsForward(T, p);
         xyz_pc1_inCoo2(i,:) = p_afterTran;
+        
+%         T_aff = Tmat{4}{pc_bestNode_distr(i,1)}.T;
+%         R_aff = T_aff(1:3,1:3); t_aff = T_aff(4,1:3);
+%         p_aff = p*R_aff + t_aff;
+%         p_aff1 = R_aff'*p' + t_aff';
+%         display(p_afterTran); 
+%         display(p_aff);
+%         display(p_aff1);
+%         display(p_afterTran);
+%         disp('--------------------');
     end
     pc1_inCoo2 = pointCloud(xyz_pc1_inCoo2);
     pc1_inCoo2.Color = pc1.Color;
 end
 
+
 function transformationMap = idx_to_transformation(idx_map, pc_bestNode_distr, Tmat)
     %===先把Tmat{4}转成[α,β，γ，t1,t2,t3]
     Tmat_6DoF = zeros(size(Tmat{4},2),1);
     for i = 1:size(Tmat_6DoF)
-        T = Tmat{4}{i}.T;
-        R = T(1:3,1:3); t = T(4,1:3);
+        T = Tmat{4}{i}.T';
+        R = T(1:3,1:3); t = T(1:3,4);
         Tmat_6DoF(i,1:3) = rodrigues(R);
         Tmat_6DoF(i,4:6) = t;
     end
@@ -128,7 +144,29 @@ function transformationMap = idx_to_transformation(idx_map, pc_bestNode_distr, T
         end
     end
 end
- 
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+
+
+function test(pc2, Tmat, pc_bestNode_distr, unique_corr)
+    data = zeros(size(unique_corr,1),3);
+    for i = 1:size(unique_corr,1)
+        i2 = unique_corr(i,2);
+        i1 = unique_corr(i,1); %the i_th point of pc correspond to the i1_th node
+        T = Tmat{4}{pc_bestNode_distr(i1)}.T';
+        R = T(1:3,1:3); t = T(1:3,4);
+        X2 = pc2.Location(i2,:)';
+        X1 = inv(R)*(X2-t);
+        data(i,:) = X1';
+
+%         T_aff = Tmat{4}{pc_bestNode_distr(i1)};
+%         X2_aff = pc2.Location(i2,:);
+%         X1_aff = transformPointsInverse(T_aff,X2_aff);
+        
+        
+    end
+    pc = pointCloud(data);
+    figure(15),pcshow(pc);title('after inv(Tmat),pc2 in coo of pc1');
+end
 
 
 

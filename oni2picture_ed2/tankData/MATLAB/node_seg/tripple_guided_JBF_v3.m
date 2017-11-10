@@ -36,7 +36,7 @@ function transformationMap = tripple_guided_JBF_v3(D1, D3, Y1, Y3, mask, transfo
                     intensity_i = ones(1, num_win)*Y3(r,c);
                     intensity_vec = exp((intensity_i - intensity_patch).^2/sigma_precompute);  %fix value
 
-                    weight_vec = G1_vec .* depth_vec .* intensity_vec;%fix value
+                    weight_vec = G1_vec .* depth_vec .* intensity_vec;  %fix value
                     
                     mask_vec = reshape(m(r+win_vec, c+win_vec), 1, num_win);
 
