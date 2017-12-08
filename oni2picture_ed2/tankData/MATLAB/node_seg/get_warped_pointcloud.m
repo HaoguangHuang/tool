@@ -85,6 +85,18 @@ function warpedPointcloud = get_warped_pointcloud(pc1, pc2, point_corr, camera_p
    %%combine all the warped pts
    warpedPointcloud = pcmerge(warped_pc_have_trans1,warped_pc_have_trans2,3); %3mm
    warpedPointcloud = pcmerge(warpedPointcloud,warped_pc_use_top_node,3);
+   array = single(warpedPointcloud.Location(:,:));
+   warpedPointcloud = pointCloud(array);
+   
+   
+   warpedPointcloud.Color = repmat(uint8([255,0,0]),warpedPointcloud.Count,1);
+   pc2.Color = repmat(uint8([0,0,255]),pc2.Count,1);
+   figure(12),pcshow(warpedPointcloud);hold on; pcshow(pc2);hold off;
+   
+   
+%    pcwrite(warpedPointcloud,... 
+%         ['./node_seg/output/pointcloud/pc_','1','.pcd'],...
+%         'Encoding','ascii');
 end
 
 

@@ -57,8 +57,12 @@ function reg_main_v2
     visualize_energy_map(pc{1}, pc{2}, corrIndex, camera_para);
     
 %% sparse2dense_v2,interpolate sparse unique correspondence point cloud into dense point cloud
-    [denseMap2, idx_map2]= sparse2dense_v2(pc{1}, pc{2}, corrIndex, camera_para, Tmat, pc_bestNode_distr);
-%     eval(['save(']);
+%     [denseMap2, idx_map2]= sparse2dense_v2(pc{1}, pc{2}, corrIndex, camera_para, Tmat, pc_bestNode_distr);
+    warpedPointcloud = get_warped_pointcloud(pc{1}, pc{2}, point_corr, camera_para, Tmat, pc_bestNode_distr);
+    
+    pcwrite(warpedPointcloud,...
+        ['./output/pointcloud/pc_','1','.pcd'],...
+        'Encoding','ascii');
 end
 
  
