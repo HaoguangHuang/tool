@@ -343,7 +343,7 @@ end
             end
         end
     end
-
+_intensity
     %======================================================================
     % Nested function to compute the changes in rotation and translation
     %======================================================================

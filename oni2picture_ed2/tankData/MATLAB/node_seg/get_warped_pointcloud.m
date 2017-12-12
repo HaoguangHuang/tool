@@ -26,8 +26,6 @@
 
 
 
-
-
 function warpedPointcloud = get_warped_pointcloud(pc1, pc2, point_corr, camera_para, Tmat, pc_bestNode_distr)
     addpath(genpath('E:\matlab_thirdparty_lib'));
     if nargin < 1, load('pc.mat','pc_197'); pc1 = pc_197; clear pc_197; end
@@ -47,7 +45,8 @@ function warpedPointcloud = get_warped_pointcloud(pc1, pc2, point_corr, camera_p
     
     
     xyz_pc1_unique = select(pc1, unique_corr(:,1));  %20342  
-    y_pc1 = xyz_pc1_unique.Color(:,1); xyzidx_pc1 = [xyz_pc1_unique.Location(:,:), unique_corr(:,1)]; 
+    y_pc1 = xyz_pc1_unique.Location(:,1);  %not use
+    xyzidx_pc1 = [xyz_pc1_unique.Location(:,:), unique_corr(:,1)]; 
     %D1:pc1_inCoo2中所有拥有unique_correspondence的点的投影uvd. guidance
     %Y1:pc1_inCoo2中所有拥有unique_correspondence的点的投影uvY
     %transformationMap1:480*640*6. 记录每个像素点的
@@ -60,7 +59,8 @@ function warpedPointcloud = get_warped_pointcloud(pc1, pc2, point_corr, camera_p
     %idx_map2:记录D2中投影点(都有unique_corr)在pc1中的对应corr
     %nonunique_nonproj:indice of occluded points
     xyz_pc1_nonunique = select(pc1,not_unique_corr(:,1));
-    y_pc1 = xyz_pc1_nonunique.Color(:,1); xyzidx_pc1 = [xyz_pc1_nonunique.Location(:,:), not_unique_corr(:,1)];
+%     y_pc1 = xyz_pc1_nonunique.Color(:,1); 
+    xyzidx_pc1 = [xyz_pc1_nonunique.Location(:,:), not_unique_corr(:,1)];
     [D2, idx_map2, nonunique_nonproj] = zbuffer_forward_proj(xyzidx_pc1,camera_para,pc1);
 %     [~, D2, ~, idx_map2]= transformXYZ2UVDI(xyzidx_pc1, camera_para, y_pc1, unique_corr);
    
