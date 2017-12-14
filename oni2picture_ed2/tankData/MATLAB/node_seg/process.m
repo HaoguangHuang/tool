@@ -1,72 +1,81 @@
-%% PROCESS_FIRST_FRAME
+%% WARPED_PC
 % pc1:pointCloud. Here pc1 is in last camera frame coo
 % pc2:pointCloud. back-projected from live depth map
 %
-% Mention: As canonical frame, pc1 of fisrt frame should be filtered in ROI to avoid unnecessary node distribution
-function [warpedPointcloud, nodeGraph]= process_first_frame(pc1, pc2, para_set, frame_no, cnt)
+% nodeGraph:{frame_no, data}------------------------------------------------------>
+%                      data:{data_1, data_2, ..., data_layers}-------------------->
+%                                                 data_L:{Tmat, node_position}---->
+%                                                         Tmat: n*1 affine3d
+%                                                         node_position: n*3 xyz
+
+function [warpedPointcloud, nodeGraph]= process(pc1, pc2, para_set, nodeGraph, frame_no, cnt)
     global debug_mode;
+    layers = para_set.nodeGraph_layers;
     camera_para = para_set.camera_para;
-    pc1 = pcdenoise(pc1); pc2 = pcdenoise(pc2); 
-    roi = [-230,inf;-inf,inf;0,980]; %197-198
-    
-    if debug_mode, figure(101),pcshow(pc1),title('before ROI filter'); end
-    pc1 = select(pc1,findPointsInROI(pc1,roi)); % place wajueji in ROI
-    if debug_mode, figure(100),pcshow(pc1),title('after ROI filter'); end
-    
-%% hierarchical node
-    layers = para_set.nodeGraph_layers; 
     node_r = para_set.node_radius;
-    node_set = cell(1,layers); %save position of nodes in each layer
-    for L = 1:layers
-        node_set{L} = pcdownsample(pc1, 'gridAverage', node_r(L)*2); % get position of nodes in each layer
-    end
+    %======grid filter======
+%     pc1 = pcdownsample(pc1, 'gridAverage', 3); % grid filter. r = 3mm
+%     pc1 = pcdenoise(pc1);
+    
+    %% get node_set_live
+    % use nodeGraph to transform nodes from 'frame_no-1' coo into 'frame_no' coo
+    node_set_updated = update_node(nodeGraph, cnt);
+    
     %=============visualize result of node segmentation=============%
-    if debug_mode, drawNodeSeg(pc1,node_r,node_set); drawNodeSeg(pc1,node_r*1.25,node_set); end
+    if debug_mode, drawNodeSeg(pc1,node_r,node_set_updated); drawNodeSeg(pc1,node_r*1.25,node_set_updated); end
+    
+    %% create node tree
+    node_tree = createNodeTree(node_set_updated,para_set.nodeGraph_layers);
+    
+    %% find pointcloud belongs to each node
+    node_r_pc1 = para_set.node_radius*1.25; node_r_pc2 = para_set.node_radius*1.25*1.1;
+    [pc_set1, pc_set1_node_index]= distr_pc(pc1,node_r_pc1,node_set_updated,layers,1);  %distribute pointcloud
+    [pc_set2, ~]= distr_pc(pc2,node_r_pc2,node_set_updated,layers,2);
     
     
-%% create hierarchical node tree
-    node_tree = createNodeTree(node_set,layers); % connect nodes with those in higher layer corresponding 
+    %% hierarchical node ICP
+    [Tmat, rmse]= hierarchical_ICP(pc_set1,pc_set2,para_set.nodeGraph_layers, node_tree);
     
-    
-%% find pointcloud belongs to each node
-    node_r_pc1 = node_r*1.25; node_r_pc2 = node_r*1.25*1.1;
-    [pc_set1, pc_set1_node_index]= distr_pc(pc1,node_r_pc1,node_set,layers,1);  %distribute pointcloud
-    [pc_set2, ~]= distr_pc(pc2,node_r_pc2,node_set,layers,2);
-    
-    
-%% hierarchical node ICP
-    [Tmat, rmse]= hierarchical_ICP(pc_set1,pc_set2,layers, node_tree);
-    this_file = '/home/hhg/Documents/myGithub2/tool/oni2picture_ed2/tankData/MATLAB/mat_data/';
-    if debug_mode 
-    save([this_file,'Tmat_wc0.mat'],'Tmat','-append');  
-    save([this_file,'rmse_wc0.mat'],'rmse','-append');
-%     analyseTmat(Tmat);%visualize rotation angle and translation
-    end
-    
-%% find best connection between node and each point in pointcloud
+    %% find best connection between node and each point in pointcloud
     thres_outlier = 2;        %mm
     [outlier_index, pc_bestNode_distr] = findBestNode(pc1,pc2,Tmat, pc_set1_node_index, layers, thres_outlier);
     corrIndex = find_unique_corr(pc_bestNode_distr, pc1, pc2, Tmat{layers}, thres_outlier);
     
-    %======visualize pc1 in coordinate of pc2 with unique correspondence transformation======
+        %======visualize pc1 in coordinate of pc2 with unique correspondence transformation======
     if debug_mode, visualize_with_corr(pc1, pc2, corrIndex, Tmat{layers},pc_bestNode_distr); end
     
-    %======visualize the optical flow map, and find whether the unique_correspondences are true or not======
+        %======visualize the optical flow map, and find whether the unique_correspondences are true or not======
     if debug_mode, visualize_energy_map(pc1, pc2, corrIndex, camera_para); end
     
-%% sparse2dense_v2,interpolate sparse unique correspondence point cloud into dense point cloud
+    %% sparse2dense_v2,interpolate sparse unique correspondence point cloud into dense point cloud======
     warpedPointcloud = get_warped_pointcloud(pc1, pc2, corrIndex, camera_para, Tmat, pc_bestNode_distr);
 
-    %======construct a nodeGraph======
+    %% construct a nodeGraph======
     nodeG_thisFrame = cell(1,layers);
     for i = 1:layers
-        nodeG_thisFrame{i} = {Tmat{i}',node_set{i}.Location(:,:)};
+        nodeG_thisFrame{i} = {Tmat{i}',node_set_updated{i}.Location(:,:)};
     end
-    nodeGraph = cell(1,2);
     nodeGraph(cnt,:) = {frame_no, nodeG_thisFrame};
-
 end
 
+
+
+function node_set_updated = update_node(nodeGraph, cnt)
+    data = nodeGraph{cnt-1,2}; 
+    layers = size(data,2);
+    node_set_updated = cell(1,layers);
+    for L = 1:layers
+        node_num = size(data{L}{2},1);
+        Tmat = data{L}{1}; pos = data{L}{2};
+        un_array = zeros(node_num,3); %updated nodes array
+        for n = 1:node_num
+            un = transformPointsForward(Tmat{n},pos(n,:));
+            un_array(n,:) = un;
+        end
+        node_set_updated{L} = pointCloud(un_array);
+    end
+    
+end
 
 
 function drawNodeSeg(pc,n_r,node_set)
@@ -173,6 +182,3 @@ function edge = findConnection(son,parent)
     dist = (parent - son_mat).^2;
     [~, edge] = min(sum(dist,2)); % need not to sqrt
 end
-
-
-

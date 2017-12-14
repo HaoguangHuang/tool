@@ -10,6 +10,9 @@ function main
     frame_start = 197; frame_end = 200;
     cnt = 1;
     camera_para = struct('fx',504.261,'fy',503.905,'cx',352.457,'cy',272.202);
+    para_set = struct('camera_para',camera_para,...
+                        'nodeGraph_layers',4,...
+                        'node_radius',[500,250,200,150]/2);
     
     for i = frame_start:frame_end-1
         %======process canonical frame and the second frame(1-2)======
@@ -18,14 +21,15 @@ function main
             D2 = imread(['./input/Wajueji_2/extractdata_afterDRev/d_',int2str(i+1),'.png']);
             pc1 = transformUVD2XYZ(D1, camera_para);
             pc2 = transformUVD2XYZ(D2, camera_para);
-            warped_pc = process_first_frame(pc1, pc2, camera_para);  
+            [warped_pc, nodeGraph]= process_first_frame(pc1, pc2, para_set, i, cnt);  
         else %cnt > 1
             %======process two neighboring frame(2-3,3-4,...)======
             D2 = imread(['./input/Wajueji_2/extractdata_afterDRev/d_',int2str(i+1),'.png']);
             pc1 = pcread(['/home/hhg/Documents/myGithub2/tool/oni2picture_ed2/tankData/MATLAB/node_seg/output/pcd_InfiniTAM/',...
                 'fusioned_pc_',int2str(i),'.pcd']);
             pc2 = transformUVD2XYZ(D2, camera_para);
-            warped_pc = process(pc1, pc2, camera_para);
+%             load('../mat_data/nodeGraph.mat','nodeGraph_197'); nodeGraph = nodeGraph_197;
+            [warped_pc, nodeGraph]= process(pc1, pc2, para_set, nodeGraph, i, cnt);
         end
         pcwrite(warped_pc,...
                     ['./output/pcd_fromMatlab/warped_pc_',int2str(i),'.pcd'],...
@@ -52,14 +56,14 @@ function modified_InfiniTAM(i)
 %     arg3 = ' ../Files/wajueji/Frames_test/%i.pgm'; %no longer be modified
     arg1 = ' /home/hhg/Documents/myGithub2/InfiniTAM_v2_hhg/InfiniTAM/Files/wajueji/calib.txt';
     arg2 = [' /home/hhg/Documents/myGithub2/tool/oni2picture_ed2/tankData/MATLAB/node_seg/output/imageSource/test_198_200/',...
-        int2str(i+1),'.ppm']; %no longer be modified
+        int2str(i+1),'.ppm'];                        %no longer be modified
     arg3 = [' /home/hhg/Documents/myGithub2/tool/oni2picture_ed2/tankData/MATLAB/node_seg/output/imageSource/test_198_200/',...
-        int2str(i+1),'.pgm']; %no longer be modified
-    arg4 = ' imu_file_not_exist';                  %no longer be modified
+        int2str(i+1),'.pgm'];                        %no longer be modified
+    arg4 = ' imu_file_not_exist';                    %no longer be modified
     arg5 = [' -pcd_file /home/hhg/Documents/myGithub2/tool/oni2picture_ed2/tankData/MATLAB/node_seg/output/pcd_fromMatlab/warped_pc_',...
-        int2str(i),'.pcd'];
+        int2str(i),'.pcd'];                          %input address, i.e. warped_pc, of InfiniTAM
     arg6 = [' -output_file_name /home/hhg/Documents/myGithub2/tool/oni2picture_ed2/tankData/MATLAB/node_seg/output/pcd_InfiniTAM/fusioned_pc_',...
-        int2str(i+1),'.pcd'];
+        int2str(i+1),'.pcd'];                        %output address of InfiniTAM
     
     dos(['sudo ',InfiniTAM_address, arg1, arg2, arg3, arg4, arg5, arg6]);
 end
