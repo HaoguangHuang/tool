@@ -13,7 +13,6 @@ function paras = EstimateMode(Pmat1, Pmat2, Corres)
 % 
 % Note: 
 % - "parameter subset" is a set of points with the same rigid transform
-% Created by Chongyu @2017-10-16
 % 2017-10-16: only for the case of k = 2;
 
 num_DOF = 2;  % the number of free parameters/rigid parts
@@ -50,7 +49,7 @@ for k=1:num_DOF
     stat(k).pose = pose_i;
     stat(k).inler_idx = true(1, num_corr);
 end
-vec_num_inlier = zeros(1, num_trial);
+vec_num_inlier = zeros(1, num_trial); %num_trial = 20
 vec_L2err = zeros(1, num_trial);
 mat_poseR = zeros(3, 3*num_trial);
 mat_poseT = zeros(3, num_trial);
@@ -58,7 +57,7 @@ mat_poseT = zeros(3, num_trial);
 % -------------------------- First round --------------------------
 tic
 for i=1:num_trial
-    rng(i); idx_trial = randperm( num_corr, num_samples); 
+    rng(i); idx_trial = randperm( num_corr, num_samples); %num_sample=30
     pose_i = est_pose_for_subset(Pmat1_uniq, Pmat2_uniq, idx_trial);
     [L2err_i, in_idx_i, num_inlier_i] = test_pose(pose_i, Pmat1_uniq, Pmat2_uniq, thr_pose_inlier);
     vec_num_inlier(i) = num_inlier_i; vec_L2err(i) = L2err_i;
@@ -71,7 +70,7 @@ for i=1:num_trial
         stat(1).inler_idx = in_idx_i;
     end
 end
- 
+% have found the best pose that have maximum inliers 
 idx_inlier_dense1 = extend_UVindex(Y_map, idx_map, UVmat1, uniq_corr(:,1), stat(1).inler_idx);  % 0.5 second
 stat(1).inler_idx = idx_map(idx_inlier_dense1);
 stat(1).pose = est_pose_for_subset(Pmat1_uniq, Pmat2_uniq, stat(1).inler_idx);
@@ -199,7 +198,7 @@ H = P1_new'*P2_new;
 [U,~,V] = svd(H);
 X = V*U';
 pose.R = X';
-pose.T = P2_mean - P1_mean*X';
+pose.T = P2_mean - P1_mean*X'; %transformation for p1--->p2
 if det(X)<0, disp('Algorithm fail.'); end
  
 function [P_new, P_mean] = centralize_pointset(P)
