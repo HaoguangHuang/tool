@@ -4,22 +4,22 @@ function mask = extractTankFunc(fu_bg_d, fu_fg_d, fu_fg_c, k, mask_gbf_c, mask_f
         I(:,:,1) = mat2gray(mask_d4c)*255;
         I(:,:,2) = fu_fg_c(:,:,1);
         I(:,:,3) = mat2gray(gt)*255;
-        if debug_mode ,figure(10),imshow(uint8(I),[]),title('maks\_d4c');drawnow; end;
+        if debug_mode ,figure(10),imshow(uint8(I),[]),title('maks\_d4c');drawnow; end
 
         mask_d4c = logical(mask_d4c) + logical(mask_gbf_c);
          I(:,:,1) = mask_d4c*255;
-        if debug_mode, figure(10),imshow(uint8(I),[]),title('maks\_d4c+mask_gbf_c');drawnow; end;
+        if debug_mode, figure(10),imshow(uint8(I),[]),title('maks\_d4c+mask_gbf_c');drawnow; end
 
         %%
-        count = 0;%µÚÒ»´ÎÖ´ĞĞ
+        count = 0;%ç¬¬ä¸€æ¬¡æ‰§è¡Œ
         weight_i = zeros(1,1);
-        %ÏÈÖ´ĞĞÒ»´ÎÈ«¾ÖµÄguided_JBF£¬µÃµ½ÍêÕûµÄweight_o
-%         [~, weight_o,~]= guided_JBF(mask_d4c, fu_fg_c(:,:,1),1,count, weight_i,8,9,0.45);%ÕâÀïÖ»ÊÇ¼ÆËãÁËweight_o
+        %å…ˆæ‰§è¡Œä¸€æ¬¡å…¨å±€çš„guided_JBFï¼Œå¾—åˆ°å®Œæ•´çš„weight_o
+%         [~, weight_o,~]= guided_JBF(mask_d4c, fu_fg_c(:,:,1),1,count, weight_i,8,9,0.45);%è¿™é‡Œåªæ˜¯è®¡ç®—äº†weight_o
         [~, weight_o,~,weight_s]= guided_JBF_opt(mask_d4c, fu_fg_c(:,:,1),1,count, weight_i,15,11,0.45);          
         count = count + 1;
         g_thres = 0;%guided thres------per pixel
         g_t = inf;
-        while count<20 %&& g_t > g_thres
+        while count<20 && g_t > g_thres
 %             [mask_d4c, ~, g_t] = guided_JBF(mask_d4c, fu_fg_c(:,:,1), -1, count, weight_o,8,9,0.45);%guided imdilate
             [mask_d4c, ~, g_t,~] = guided_JBF_opt(mask_d4c, fu_fg_c(:,:,1), -1, count, weight_o,15,11,0.45,weight_s);            
             if g_t <= g_thres
@@ -34,9 +34,9 @@ function mask = extractTankFunc(fu_bg_d, fu_fg_d, fu_fg_c, k, mask_gbf_c, mask_f
         I(:,:,1) = mask_gbf_d*255;
         I(:,:,2) = fu_fg_c(:,:,1);
         I(:,:,3) = mat2gray(gt)*255;
-        if debug_mode, figure(18),imshow(uint8(I)),title('final result');drawnow; end;
+        if debug_mode, figure(18),imshow(uint8(I)),title('final result');drawnow; end
         imwrite(uint8(mask_gbf_d), [mask_file,'res_',int2str(k),'.png']);
-        imwrite(uint8(I), [mask_file,'vis\res_',int2str(k),'.png'])
+        imwrite(uint8(I), [mask_file,'vis/res_',int2str(k),'.png'])
         
         mask = mask_gbf_d;
 end

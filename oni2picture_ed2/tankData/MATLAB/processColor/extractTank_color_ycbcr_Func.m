@@ -7,12 +7,12 @@ function mask_gbf_c = extractTank_color_ycbcr_Func(fu_bg_c, fu_fg_c, k, mask_d4c
         if debug_mode, figure(888),imshow(mask_c4d,[]),title('color intensity substract');drawnow; end;
 
         t = tic;
-        count = 0;%µÚÒ»´ÎÖ´ĞĞ
+        count = 0;%ç¬¬ä¸€æ¬¡æ‰§è¡Œ
         weight_i = zeros(1,1);
-        %ÏÈÖ´ĞĞÒ»´ÎÈ«¾ÖµÄguided_JBF£¬µÃµ½ÍêÕûµÄweight_o
+        %å…ˆæ‰§è¡Œä¸€æ¬¡å…¨å±€çš„guided_JBFï¼Œå¾—åˆ°å®Œæ•´çš„weight_o
         if 1
-%         [~, weight_o,~]= guided_JBF(mask_c4d, Y_fg,-1,count, weight_i,3,5,0.5);%ÕâÀïÖ»ÊÇ¼ÆËãÁËweight_o
-        [~, weight_o,~,weight_s]= guided_JBF_opt(mask_c4d, Y_fg,-1,count, weight_i,6,7,0.5);%ÕâÀïÖ»ÊÇ¼ÆËãÁËweight_o
+%         [~, weight_o,~]= guided_JBF(mask_c4d, Y_fg,-1,count, weight_i,3,5,0.5);%è¿™é‡Œåªæ˜¯è®¡ç®—äº†weight_o
+        [~, weight_o,~,weight_s]= guided_JBF_opt(mask_c4d, Y_fg,-1,count, weight_i,6,7,0.5);%è¿™é‡Œåªæ˜¯è®¡ç®—äº†weight_o
         count = count + 1;
         g_thres = 10;%guided thres------per pixel
         g_t = inf;

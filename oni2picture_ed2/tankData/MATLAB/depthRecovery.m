@@ -4,7 +4,8 @@ function depthRecovery(mask, fg_c, fg_d, k, result_file)
 %         fg_c_name = ['E:\dataSet\Wajueji_2\processedData\color\fusionedForegroundData\fusionedForegroundData',int2str(k),'.png',]; 
 %         fg_d_name = ['E:\dataSet\Wajueji_2\processedData\depth\fusionedForegroundData\fusionedForegroundData',int2str(k),'.png'];
 %         mask = imread(m_name); fg_c = imread(fg_c_name); fg_d = imread(fg_d_name);
-    for k = 183:200
+
+%     for k = 183:200
         if nargin<1, mask = imread(['E:\dataSet\Wajueji_2\processedData\182_200\res_',int2str(k),'.png']);end
         if nargin<2, fg_c = imread(['E:\dataSet\Wajueji_2\processedData\color\fusionedForegroundData\fusionedForegroundData',int2str(k),'.png',]);end
         if nargin<3, fg_d = imread(['E:\dataSet\Wajueji_2\processedData\depth\fusionedForegroundData\fusionedForegroundData',int2str(k),'.png']);end
@@ -13,7 +14,7 @@ function depthRecovery(mask, fg_c, fg_d, k, result_file)
         thres  = 0;
         count = 0;
         
-        fg_d = logical(fg_d) & logical(mask);
+        fg_d = double(fg_d) .* double(mask);
         %%=======compute weight_o======
         [~,weight_o,~] = guided_d_recvy(fg_d, fg_c, -1, count, zeros(1,1), mask);
         count = count +1;
@@ -36,5 +37,5 @@ function depthRecovery(mask, fg_c, fg_d, k, result_file)
         res_c(:,:,3) = fg_c(:,:,3) .* uint8(mask);
         imwrite(uint16(res_d), [result_file,'d_',int2str(k),'.png'])
         imwrite(uint8(res_c), [result_file,'c_',int2str(k),'.png'])
-    end
+%     end
 end

@@ -1,6 +1,6 @@
 function m = saveColorMask(fu_bg_c, fu_fg_c)
     tic;
-    thres = 40;
+    thres = 80;
     global debug_mode;   global gt;
     Y_fg = fu_fg_c(:,:,1);
     Y_bg = fu_bg_c(:,:,1);
