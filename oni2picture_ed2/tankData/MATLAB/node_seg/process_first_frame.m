@@ -37,11 +37,11 @@ function [warpedPointcloud, nodeGraph]= process_first_frame(pc1, pc2, para_set, 
 %% hierarchical node ICP
     [Tmat, rmse]= hierarchical_ICP(pc_set1,pc_set2,layers, node_tree);
     this_file = '/home/hhg/Documents/myGithub2/tool/oni2picture_ed2/tankData/MATLAB/mat_data/';
-    if debug_mode 
-    save([this_file,'Tmat_wc0.mat'],'Tmat','-append');  
-    save([this_file,'rmse_wc0.mat'],'rmse','-append');
-%     analyseTmat(Tmat);%visualize rotation angle and translation
-    end
+%     if debug_mode 
+%     save([this_file,'Tmat_wc0.mat'],'Tmat','-append');  
+%     save([this_file,'rmse_wc0.mat'],'rmse','-append');
+% %     analyseTmat(Tmat);%visualize rotation angle and translation
+%     end
     
 %% find best connection between node and each point in pointcloud
     thres_outlier = 2;        %mm
@@ -140,6 +140,12 @@ function [Tmat, rmse] = hierarchical_ICP(moving_pc,fixed_pc,layers, node_tree)
                 [Tmat{L}{n},~,rmse{L}{n}] = pcregrigid(moving_pc{L}{n},fixed_pc{L}{n},'Metric','pointToPoint','Verbose',true);
                 disp(['--------------now is layer ',int2str(L),' the ',int2str(n),'th node']);
             else % L=2,3,4
+                if moving_pc{L}{n}.Count < 3 || fixed_pc{L}{n}.Count < 3
+                    Tmat{L}{n} = Tmat{L-1}{node_tree{L}(n)};
+                    rmse{L}{n} = inf;
+                    disp(['--------------now is layer ',int2str(L),' the ',int2str(n),'th node']);
+                    break;
+                end
                 [Tmat{L}{n},~,rmse{L}{n}] = pcregrigid(moving_pc{L}{n},fixed_pc{L}{n},'Metric','pointToPoint','Verbose',true,...
                     'InitialTransform',Tmat{L-1}{node_tree{L}(n)});
                 disp(['--------------now is layer ',int2str(L),' the ',int2str(n),'th node']);

@@ -149,6 +149,12 @@ function [Tmat, rmse] = hierarchical_ICP(moving_pc,fixed_pc,layers, node_tree)
                 [Tmat{L}{n},~,rmse{L}{n}] = pcregrigid(moving_pc{L}{n},fixed_pc{L}{n},'Metric','pointToPoint','Verbose',true);
                 disp(['--------------now is layer ',int2str(L),' the ',int2str(n),'th node']);
             else % L=2,3,4
+                if moving_pc{L}{n}.Count < 3 || fixed_pc{L}{n}.Count < 3
+                    Tmat{L}{n} = Tmat{L-1}{node_tree{L}(n)};
+                    rmse{L}{n} = inf;
+                    disp(['--------------now is layer ',int2str(L),' the ',int2str(n),'th node']);
+                    continue;
+                end
                 [Tmat{L}{n},~,rmse{L}{n}] = pcregrigid(moving_pc{L}{n},fixed_pc{L}{n},'Metric','pointToPoint','Verbose',true,...
                     'InitialTransform',Tmat{L-1}{node_tree{L}(n)});
                 disp(['--------------now is layer ',int2str(L),' the ',int2str(n),'th node']);
