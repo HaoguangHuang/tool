@@ -1,24 +1,25 @@
-%% MAIN
-% process whole pipeline of paraFusion, without nodeGraph module and DOF analysis module
+%% MAIN_WITH_NODE_EXTEND
+% process whole pipeline of paraFusion, containing nodeGraph module and DOF analysis module
 %
 % fusioned_pc_i:pointcloud fusioned by depthMap from frame_start to the i_th frame
 %
 % Mention:It is necessary to change your folder into ./node_seg before execute this main.m
-% 此main函数，没有nodeGraph管理以及自由度分析模块，只能处理不含自旋转的数据集
-function main
+% 此main函数，包含nodeGraph管理以及自由度分析模块，可以处理不含自旋转的数据集
+function main_withNodeExtend
     Addpath; close all;  
     global debug_mode; debug_mode = 0;    
     frame_start = 150; frame_end = 199;
-    cnt = 1;
+    cnt = 2;
     camera_para = struct('fx',504.261,'fy',503.905,'cx',352.457,'cy',272.202);
     para_set = struct('camera_para',camera_para,...
                         'nodeGraph_layers',4,...
-                        'node_radius',[500,250,200,150]/2);
+                        'node_radius',[500,250,200,150]/2,...
+                        'OOR_thres', 300);
     nodeGraph_name = ['nodeGraph_',int2str(frame_start),'_',int2str(frame_end)];
     
     load('./output/result/nodeGraph_150_199.mat');
     tic;
-    for i = frame_start:frame_end-1
+    for i = 151:199%frame_start:frame_end
         %======process canonical frame and the second frame(1-2)======
         if cnt == 1
             D1 = imread(['./input/Wajueji_2/2.0/d_',int2str(i),'.png']);
@@ -27,8 +28,8 @@ function main
             pc2 = transformUVD2XYZ(D2, camera_para);
             [warped_pc, nodeGraph]= process_first_frame(pc1, pc2, para_set, i, cnt);
 %             
-            eval([nodeGraph_name, '= nodeGraph;']);
-            save(['./output/result/',nodeGraph_name,'.mat'],'nodeGraph');
+%             eval([nodeGraph_name, '= nodeGraph;']);
+%             save(['./output/result/',nodeGraph_name,'.mat'],'nodeGraph');
 
         else %cnt > 1
             %======process two neighboring frame(2-3,3-4,...)======
@@ -40,8 +41,8 @@ function main
 %             load('../mat_data/nodeGraph.mat','nodeGraph_197'); nodeGraph = nodeGraph_197;
             [warped_pc, nodeGraph]= process(pc1, pc2, para_set, nodeGraph, i, cnt);
             
-            eval([nodeGraph_name, '= nodeGraph;']);
-            save(['./output/result/',nodeGraph_name,'.mat'],'nodeGraph','-append');
+%             eval([nodeGraph_name, '= nodeGraph;']);
+%             save(['./output/result/',nodeGraph_name,'.mat'],'nodeGraph','-append');
 
         end
         pcwrite(warped_pc,...

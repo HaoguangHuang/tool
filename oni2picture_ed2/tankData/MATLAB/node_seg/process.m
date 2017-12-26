@@ -18,20 +18,48 @@ function [warpedPointcloud, nodeGraph]= process(pc1, pc2, para_set, nodeGraph, f
 %     pc1 = pcdenoise(pc1);
     
     %% get node_set_live
-    % use nodeGraph to transform nodes from 'frame_no-1' coo into 'frame_no' coo
+    % use nodeGraph to transform nodes from 'frame_no-2' coo into 'frame_no-1' coo
     node_set_updated = update_node(nodeGraph, cnt);
     
     %=============visualize result of node segmentation=============%
     if debug_mode, drawNodeSeg(pc1,node_r,node_set_updated); drawNodeSeg(pc1,node_r*1.25,node_set_updated); end
     
-    %% create node tree
-    node_tree = createNodeTree(node_set_updated,para_set.nodeGraph_layers);
     
     %% find pointcloud belongs to each node
     node_r_pc1 = para_set.node_radius*1.25; node_r_pc2 = para_set.node_radius*1.25*1.1;
     [pc_set1, pc_set1_node_index]= distr_pc(pc1,node_r_pc1,node_set_updated,layers,1);  %distribute pointcloud
+    
+    
+    %======check how many pts don't belong to any node in the highest layer======
+    record = sum(pc_set1_node_index, 2);
+    pt_belongTo_noNode_idx = record == 0;
+    NEED_TO_ADD_HIGHEST_NEW_NODE = sum(pt_belongTo_noNode_idx) > para_set.OOR_thres;
+    if  NEED_TO_ADD_HIGHEST_NEW_NODE %need to add new nodes in the highest layer
+        indice = 1:pc1.Count;
+        pc_belongTo_noNode = select(pc1,indice(pt_belongTo_noNode_idx));
+        node_added_set = pcdownsample(pc_belongTo_noNode, 'gridAverage', node_r(layers)*2);
+        
+        node_set_updated = add_new_node_to_highest_layer(node_set_updated, node_added_set, layers);
+        
+        % check whether each nodes can be conquered by any of the node from higher layer
+        [HAVE_ADD_LOWER_LAYER_NODE, node_set_updated]= update_node_set(node_set_updated, node_r);
+        if HAVE_ADD_LOWER_LAYER_NODE, disp('-------Have updated node_set!-------');  end
+        
+        %======visualize points that don't belong to any node
+        if debug_mode
+            pc1.Color = repmat(uint8([255,0,0]),pc1.Count,1);
+            pc_belongTo_noNode.Color = repmat(uint8([0,255,0]),pc_belongTo_noNode.Count,1);
+            figure(12),pcshow(pc1),hold on, pcshow(pc_belongTo_noNode),hold off, title('pc1(R) and pc\_belongTo\_noNode(G)');
+        end
+        
+        [pc_set1, pc_set1_node_index]= distr_pc(pc1,node_r_pc1,node_set_updated,layers,1);  %redistribute pointcloud
+    end
+   
     [pc_set2, ~]= distr_pc(pc2,node_r_pc2,node_set_updated,layers,2);
     
+    
+    %% create node tree
+    node_tree = createNodeTree(node_set_updated, layers);
     
     %% hierarchical node ICP
     [Tmat, rmse]= hierarchical_ICP(pc_set1,pc_set2,para_set.nodeGraph_layers, node_tree);
@@ -56,6 +84,51 @@ function [warpedPointcloud, nodeGraph]= process(pc1, pc2, para_set, nodeGraph, f
         nodeG_thisFrame{i} = {Tmat{i}',node_set_updated{i}.Location(:,:)};
     end
     nodeGraph(cnt,:) = {frame_no, nodeG_thisFrame};
+end
+
+
+% check whether each nodes can be conquered by any of the node from higher layer.
+% if find, add new nodes in lower layer
+function [HAVE_ADD_LOWER_LAYER_NODE, node_set_updated] = update_node_set(node_set_updated, node_r)
+    L = size(node_set_updated, 2);
+    HAVE_ADD_LOWER_LAYER_NODE = false;
+    for l = fliplr(2:L)
+        node_isolate_array = zeros(0,0);
+        node_set_higher = node_set_updated{l}.Location;
+        node_set_lower = node_set_updated{l-1}.Location;
+        %find all the isolate node in l layer
+        for i = 1:size(node_set_higher,1)
+            if checkNN(node_set_lower, node_set_higher(i,:),node_r(l-1))
+                node_isolate_array(end+1,:) = node_set_higher(i,:);
+            end
+        end
+        
+        if ~isempty(node_isolate_array) %add node to lower layer
+            node_add = pcdownsample(pointCloud(node_isolate_array),'gridAverage',node_r(l-1)*2);
+            node_add = node_add.Location;
+            node_set_lower = [node_set_lower; node_add];
+            node_set_updated{l-1} = pointCloud(node_set_lower);
+            HAVE_ADD_LOWER_LAYER_NODE = true;
+        end
+    end
+end
+
+%==judge distance between higher node and its nearest lower node is larger than node_radius of lower nodes or not==
+function flag = checkNN(node_set_lower, node_higher, r_lower)
+    flag = 0; %node_higher can be conquer by one node of node_set_lower
+    n_map = repmat(node_higher, size(node_set_lower,1), 1);
+    dist = sqrt(sum((node_set_lower - n_map).^2, 2));
+    if min(dist)>r_lower, flag = 1; end
+end
+
+
+% node_added_set: pointCloud. Record position of added nodes
+% L: Highest layer
+function node_set_updated = add_new_node_to_highest_layer(node_set_updated, node_added_set, L)
+    pc_array = node_set_updated{L}.Location;
+    n = size(node_added_set.Location,1);
+    pc_array(end+1:end+n,:) = node_added_set.Location;
+    node_set_updated{L} = pointCloud(pc_array);
 end
 
 
