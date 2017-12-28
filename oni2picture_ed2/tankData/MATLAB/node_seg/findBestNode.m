@@ -14,6 +14,8 @@ function [outlier_index, pc_bestNode_distr] = findBestNode(pc1, pc2, Tmat, pc_se
     elseif nargin < 6, thres = 1;            %mm
     end
     
+    global debug_mode;
+    
     tmp = sum(pc_set1_node_index,2);
     one_index = tmp == 1;   morethanone_index = tmp > 1;
     pc_bestNode_distr = zeros(pc1.Count,1); outlier_index = zeros(pc1.Count,2);
@@ -52,11 +54,14 @@ function [outlier_index, pc_bestNode_distr] = findBestNode(pc1, pc2, Tmat, pc_se
     inlier_rate(1,count) = sum(dd(dd(:,2)<inf,2)<t,1)/pc1.Count;     % here point controlled by none node is regarded as outlier
     count = count + 1;
     end
-    figure(100),bar(t_thres,inlier_rate,0.4);xlabel('thres/mm');ylabel('inlier rate');title('ICP result of layer 4');grid on;
+    if debug_mode
+        figure(100),bar(t_thres,inlier_rate,0.4);xlabel('thres/mm');ylabel('inlier rate');title('ICP result of layer 4');grid on;
+    end
     %%===========visualize outlier in pc1=================
     pc1_outlier = select(pc1,outlier_index(outlier_index(:,2)==1,1));% here point controlled by none node is regarded as inlier
     pc1_outlier.Color = repmat(uint8([255,0,0]),pc1_outlier.Count,1);
-    figure(101);pcshow(pc1);hold on; pcshow(pc1_outlier);title(['outlier(red) in pc1, thres=',num2str(thres),'mm']);hold off;
-    
+    if debug_mode
+        figure(101);pcshow(pc1);hold on; pcshow(pc1_outlier);title(['outlier(red) in pc1, thres=',num2str(thres),'mm']);hold off;
+    end
     
 end
