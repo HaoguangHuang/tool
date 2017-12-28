@@ -8,28 +8,32 @@
 function main_withNodeExtend
     Addpath; close all;  
     global debug_mode; debug_mode = 0;    
-    frame_start = 150; frame_end = 199;
-    cnt = 2;
+    frame_start = 150; frame_end = 200;
+    cnt = 1;
     camera_para = struct('fx',504.261,'fy',503.905,'cx',352.457,'cy',272.202);
     para_set = struct('camera_para',camera_para,...
                         'nodeGraph_layers',4,...
                         'node_radius',[500,250,200,150]/2,...
                         'OOR_thres', 300);
     nodeGraph_name = ['nodeGraph_',int2str(frame_start),'_',int2str(frame_end)];
+    DoF_node_relation_map = [];
     
-    load('./output/result/nodeGraph_150_199.mat');
+%     load('./output/result/nodeGraph_150_199.mat');
     tic;
-    for i = 151:199%frame_start:frame_end
+    for i = frame_start:frame_end
         %======process canonical frame and the second frame(1-2)======
         if cnt == 1
             D1 = imread(['./input/Wajueji_2/2.0/d_',int2str(i),'.png']);
             D2 = imread(['./input/Wajueji_2/2.0/d_',int2str(i+1),'.png']);
             pc1 = transformUVD2XYZ(D1, camera_para);
             pc2 = transformUVD2XYZ(D2, camera_para);
-            [warped_pc, nodeGraph]= process_first_frame(pc1, pc2, para_set, i, cnt);
-%             
-%             eval([nodeGraph_name, '= nodeGraph;']);
-%             save(['./output/result/',nodeGraph_name,'.mat'],'nodeGraph');
+            [warped_pc, nodeGraph, DoF_node_relation_map]= process_first_frame(pc1, pc2, para_set, i, cnt, DoF_node_relation_map);
+%
+            eval([nodeGraph_name, '= nodeGraph;']);
+            if exist(['./output/result/',nodeGraph_name,'.mat'],'file')  % have exist destination file
+                delete(['./output/result/',nodeGraph_name,'.mat']);
+            end
+            save(['./output/result/',nodeGraph_name,'.mat'],'nodeGraph');
 
         else %cnt > 1
             %======process two neighboring frame(2-3,3-4,...)======
@@ -41,8 +45,8 @@ function main_withNodeExtend
 %             load('../mat_data/nodeGraph.mat','nodeGraph_197'); nodeGraph = nodeGraph_197;
             [warped_pc, nodeGraph]= process(pc1, pc2, para_set, nodeGraph, i, cnt);
             
-%             eval([nodeGraph_name, '= nodeGraph;']);
-%             save(['./output/result/',nodeGraph_name,'.mat'],'nodeGraph','-append');
+            eval([nodeGraph_name, '= nodeGraph;']);
+            save(['./output/result/',nodeGraph_name,'.mat'],'nodeGraph','-append');
 
         end
         pcwrite(warped_pc,...

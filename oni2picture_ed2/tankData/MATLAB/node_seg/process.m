@@ -29,32 +29,34 @@ function [warpedPointcloud, nodeGraph]= process(pc1, pc2, para_set, nodeGraph, f
     node_r_pc1 = para_set.node_radius*1.25; node_r_pc2 = para_set.node_radius*1.25*1.1;
     [pc_set1, pc_set1_node_index]= distr_pc(pc1,node_r_pc1,node_set_updated,layers,1);  %distribute pointcloud
     
-    
+    %% nodeGraph module 
     %======check how many pts don't belong to any node in the highest layer======
-    record = sum(pc_set1_node_index, 2);
-    pt_belongTo_noNode_idx = record == 0;
-    NEED_TO_ADD_HIGHEST_NEW_NODE = sum(pt_belongTo_noNode_idx) > para_set.OOR_thres;
-    if  NEED_TO_ADD_HIGHEST_NEW_NODE %need to add new nodes in the highest layer
-        indice = 1:pc1.Count;
-        pc_belongTo_noNode = select(pc1,indice(pt_belongTo_noNode_idx));
-        node_added_set = pcdownsample(pc_belongTo_noNode, 'gridAverage', node_r(layers)*2);
-        
-        node_set_updated = add_new_node_to_highest_layer(node_set_updated, node_added_set, layers);
-        
-        % check whether each nodes can be conquered by any of the node from higher layer
-        [HAVE_ADD_LOWER_LAYER_NODE, node_set_updated]= update_node_set(node_set_updated, node_r);
-        if HAVE_ADD_LOWER_LAYER_NODE, disp('-------Have updated node_set!-------');  end
-        
-        %======visualize points that don't belong to any node
-        if debug_mode
-            pc1.Color = repmat(uint8([255,0,0]),pc1.Count,1);
-            pc_belongTo_noNode.Color = repmat(uint8([0,255,0]),pc_belongTo_noNode.Count,1);
-            figure(12),pcshow(pc1),hold on, pcshow(pc_belongTo_noNode),hold off, title('pc1(R) and pc\_belongTo\_noNode(G)');
+    if 0
+        record = sum(pc_set1_node_index, 2);
+        pt_belongTo_noNode_idx = record == 0;
+        NEED_TO_ADD_HIGHEST_NEW_NODE = sum(pt_belongTo_noNode_idx) > para_set.OOR_thres;
+        if  NEED_TO_ADD_HIGHEST_NEW_NODE %need to add new nodes in the highest layer
+            indice = 1:pc1.Count;
+            pc_belongTo_noNode = select(pc1,indice(pt_belongTo_noNode_idx));
+            node_added_set = pcdownsample(pc_belongTo_noNode, 'gridAverage', node_r(layers)*2);
+
+            node_set_updated = add_new_node_to_highest_layer(node_set_updated, node_added_set, layers);
+
+            % check whether each nodes can be conquered by any of the node from higher layer
+            [HAVE_ADD_LOWER_LAYER_NODE, node_set_updated]= update_node_set(node_set_updated, node_r);
+            if HAVE_ADD_LOWER_LAYER_NODE, disp('-------Have updated node_set!-------');  end
+
+            %======visualize points that don't belong to any node
+            if debug_mode
+                pc1.Color = repmat(uint8([255,0,0]),pc1.Count,1);
+                pc_belongTo_noNode.Color = repmat(uint8([0,255,0]),pc_belongTo_noNode.Count,1);
+                figure(12),pcshow(pc1),hold on, pcshow(pc_belongTo_noNode),hold off, title('pc1(R) and pc\_belongTo\_noNode(G)');
+            end
+
+            [pc_set1, pc_set1_node_index]= distr_pc(pc1,node_r_pc1,node_set_updated,layers,1);  %redistribute pointcloud
         end
-        
-        [pc_set1, pc_set1_node_index]= distr_pc(pc1,node_r_pc1,node_set_updated,layers,1);  %redistribute pointcloud
     end
-   
+    
     [pc_set2, ~]= distr_pc(pc2,node_r_pc2,node_set_updated,layers,2);
     
     
@@ -68,6 +70,10 @@ function [warpedPointcloud, nodeGraph]= process(pc1, pc2, para_set, nodeGraph, f
     thres_outlier = 2;        %mm
     [outlier_index, pc_bestNode_distr] = findBestNode(pc1,pc2,Tmat, pc_set1_node_index, layers, thres_outlier);
     corrIndex = find_unique_corr(pc_bestNode_distr, pc1, pc2, Tmat{layers}, thres_outlier);
+    
+    uniq_name = ['corrIndex_',int2str(frame_no),'_',int2str(frame_no+1)];
+    eval([uniq_name,'=corrIndex']);
+    save('./output/result/corr.mat',uniq_name,'-append');
     
         %======visualize pc1 in coordinate of pc2 with unique correspondence transformation======
     if debug_mode, visualize_with_corr(pc1, pc2, corrIndex, Tmat{layers},pc_bestNode_distr); end

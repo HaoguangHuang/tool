@@ -3,7 +3,7 @@
 % pc2:pointCloud. back-projected from live depth map
 %
 % Mention: As canonical frame, pc1 of fisrt frame should be filtered in ROI to avoid unnecessary node distribution
-function [warpedPointcloud, nodeGraph]= process_first_frame(pc1, pc2, para_set, frame_no, cnt)
+function [warpedPointcloud, nodeGraph, DoF_node_relation_map]= process_first_frame(pc1, pc2, para_set, frame_no, cnt, DoF_node_relation_map)
     global debug_mode;
     camera_para = para_set.camera_para;
     pc1 = pcdenoise(pc1); pc2 = pcdenoise(pc2); 
@@ -48,11 +48,24 @@ function [warpedPointcloud, nodeGraph]= process_first_frame(pc1, pc2, para_set, 
     [outlier_index, pc_bestNode_distr] = findBestNode(pc1,pc2,Tmat, pc_set1_node_index, layers, thres_outlier);
     corrIndex = find_unique_corr(pc_bestNode_distr, pc1, pc2, Tmat{layers}, thres_outlier);
     
+%     if exist('./output/result/corr.mat','file')
+%         delete('./output/result/corr.mat');
+%     end
+    
+    uniq_name = ['corrIndex_',int2str(frame_no),'_',int2str(frame_no+1)];
+    eval([uniq_name,'=corrIndex']);
+    save('./output/result/corr.mat',uniq_name);
+    
     %======visualize pc1 in coordinate of pc2 with unique correspondence transformation======
     if debug_mode, visualize_with_corr(pc1, pc2, corrIndex, Tmat{layers},pc_bestNode_distr); end
     
     %======visualize the optical flow map, and find whether the unique_correspondences are true or not======
     if debug_mode, visualize_energy_map(pc1, pc2, corrIndex, camera_para); end
+    
+%% IRP_analysis
+%     DoF_node_relation_map = IRP_analysis(pc1, pc2, corrIndex, 0.3, DoF_node_relation_map);
+%     DoF_node_relation_map = IRP_analysis(pc1, pc2, corrIndex, para_set.OOR_thres, DoF_node_relation_map);
+    
     
 %% sparse2dense_v2,interpolate sparse unique correspondence point cloud into dense point cloud
     warpedPointcloud = get_warped_pointcloud(pc1, pc2, corrIndex, camera_para, Tmat, pc_bestNode_distr);
