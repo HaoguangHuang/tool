@@ -71,9 +71,9 @@ function [warpedPointcloud, nodeGraph]= process(pc1, pc2, para_set, nodeGraph, f
     [outlier_index, pc_bestNode_distr] = findBestNode(pc1,pc2,Tmat, pc_set1_node_index, layers, thres_outlier);
     corrIndex = find_unique_corr(pc_bestNode_distr, pc1, pc2, Tmat{layers}, thres_outlier);
     
-    uniq_name = ['corrIndex_',int2str(frame_no),'_',int2str(frame_no+1)];
-    eval([uniq_name,'=corrIndex']);
-    save('./output/result/corr.mat',uniq_name,'-append');
+%     uniq_name = ['corrIndex_',int2str(frame_no),'_',int2str(frame_no+1)];
+%     eval([uniq_name,'=corrIndex']);
+%     save('./output/result/corr_1_200.mat',uniq_name,'-append');
     
         %======visualize pc1 in coordinate of pc2 with unique correspondence transformation======
     if debug_mode, visualize_with_corr(pc1, pc2, corrIndex, Tmat{layers},pc_bestNode_distr); end

@@ -7,11 +7,12 @@ function [warpedPointcloud, nodeGraph, DoF_node_relation_map]= process_first_fra
     global debug_mode;
     camera_para = para_set.camera_para;
     pc1 = pcdenoise(pc1); pc2 = pcdenoise(pc2); 
-    roi = [-230,inf;-inf,inf;0,980]; %197-198
-    
-    if debug_mode, figure(101),pcshow(pc1),title('before ROI filter'); end
+%     roi = [-230,inf;-inf,inf;0,980]; %197-198
+    roi = [-350,200,-250,100,700,900]; %frame 1    
+
+    if debug_mode, figure(101),pcshow(pc1),title('before ROI filter');  xlabel('x'),ylabel('y'),zlabel('z');end
     pc1 = select(pc1,findPointsInROI(pc1,roi)); % place wajueji in ROI
-    if debug_mode, figure(100),pcshow(pc1),title('after ROI filter'); end
+    if debug_mode, figure(100),pcshow(pc1),title('after ROI filter');  xlabel('x'),ylabel('y'),zlabel('z');end
     
 %% hierarchical node
     layers = para_set.nodeGraph_layers; 
@@ -48,13 +49,13 @@ function [warpedPointcloud, nodeGraph, DoF_node_relation_map]= process_first_fra
     [outlier_index, pc_bestNode_distr] = findBestNode(pc1,pc2,Tmat, pc_set1_node_index, layers, thres_outlier);
     corrIndex = find_unique_corr(pc_bestNode_distr, pc1, pc2, Tmat{layers}, thres_outlier);
     
-%     if exist('./output/result/corr.mat','file')
-%         delete('./output/result/corr.mat');
+%     if exist('./output/result/corr_1_200.mat','file')
+%         delete('./output/result/corr_1_200.mat');
 %     end
     
-    uniq_name = ['corrIndex_',int2str(frame_no),'_',int2str(frame_no+1)];
-    eval([uniq_name,'=corrIndex']);
-    save('./output/result/corr.mat',uniq_name);
+%     uniq_name = ['corrIndex_',int2str(frame_no),'_',int2str(frame_no+1)];
+%     eval([uniq_name,'=corrIndex']);
+%     save('./output/result/corr_1_200.mat',uniq_name);
     
     %======visualize pc1 in coordinate of pc2 with unique correspondence transformation======
     if debug_mode, visualize_with_corr(pc1, pc2, corrIndex, Tmat{layers},pc_bestNode_distr); end

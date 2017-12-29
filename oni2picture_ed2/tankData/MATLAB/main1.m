@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %process depth map and ycbcr map
-%process wajueji2, frame 182 to 200
+%process wajueji2
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % clear all; close all;
@@ -19,7 +19,7 @@ fu_bg_c = imread(fusioned_Bg_c_file);
 global debug_mode; debug_mode = 1;
 global gt;         gt = zeros(size(fu_bg_d)); 
 
-for k = 1:181 %1:frameNum
+for k = 1:200 %1:frameNum
     fu_fg_d = imread([fusioned_Fg_d_file,'fusionedForegroundData',int2str(k),'.png']);
     fu_fg_c = imread([fusioned_Fg_c_file,'fusionedForegroundData',int2str(k),'.png']);
     mask_d4c = saveDepthMask(fu_bg_d, fu_fg_d, k, subs_file, fu_fg_c);
