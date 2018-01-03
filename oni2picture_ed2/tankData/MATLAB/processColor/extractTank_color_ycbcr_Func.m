@@ -16,7 +16,7 @@ function mask_gbf_c = extractTank_color_ycbcr_Func(fu_bg_c, fu_fg_c, k, mask_d4c
         count = count + 1;
         g_thres = 10;%guided thres------per pixel
         g_t = inf;
-        while count<5
+        while count<50
 %             [mask_c4d, ~, g_t] = guided_JBF(mask_c4d, Y_fg, -1, count, weight_o,3,5,0.5);%guided imdilate
             [mask_c4d, ~, g_t,~] = guided_JBF_opt(mask_c4d, Y_fg, -1, count, weight_o,6,7,0.5,weight_s);
             if g_t <= g_thres

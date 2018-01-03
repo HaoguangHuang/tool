@@ -15,13 +15,13 @@ function mask = extractTankFunc(fu_bg_d, fu_fg_d, fu_fg_c, k, mask_gbf_c, mask_f
         weight_i = zeros(1,1);
         %先执行一次全局的guided_JBF，得到完整的weight_o
 %         [~, weight_o,~]= guided_JBF(mask_d4c, fu_fg_c(:,:,1),1,count, weight_i,8,9,0.45);%这里只是计算了weight_o
-        [~, weight_o,~,weight_s]= guided_JBF_opt(mask_d4c, fu_fg_c(:,:,1),1,count, weight_i,15,11,0.45);          
+        [~, weight_o,~,weight_s]= guided_JBF_opt(mask_d4c, fu_fg_c(:,:,1),1,count, weight_i,6,13,0.50);          
         count = count + 1;
         g_thres = 0;%guided thres------per pixel
         g_t = inf;
         while count<20 && g_t > g_thres
 %             [mask_d4c, ~, g_t] = guided_JBF(mask_d4c, fu_fg_c(:,:,1), -1, count, weight_o,8,9,0.45);%guided imdilate
-            [mask_d4c, ~, g_t,~] = guided_JBF_opt(mask_d4c, fu_fg_c(:,:,1), -1, count, weight_o,15,11,0.45,weight_s);            
+            [mask_d4c, ~, g_t,~] = guided_JBF_opt(mask_d4c, fu_fg_c(:,:,1), -1, count, weight_o,6,13,0.50,weight_s);            
             if g_t <= g_thres
                 disp(['frame ',int2str(k), '------------total for ', int2str(count), ' times!']);
                 break;
@@ -34,9 +34,9 @@ function mask = extractTankFunc(fu_bg_d, fu_fg_d, fu_fg_c, k, mask_gbf_c, mask_f
         I(:,:,1) = mask_gbf_d*255;
         I(:,:,2) = fu_fg_c(:,:,1);
         I(:,:,3) = mat2gray(gt)*255;
-        if debug_mode, figure(18),imshow(uint8(I)),title('final result');drawnow; end
-        imwrite(uint8(mask_gbf_d), [mask_file,'res_',int2str(k),'.png']);
-        imwrite(uint8(I), [mask_file,'vis/res_',int2str(k),'.png'])
+        if debug_mode, figure(18),imshow(uint8(I)),title(sprintf('frame_%d,final result',k));drawnow; end
+%         imwrite(uint8(mask_gbf_d), [mask_file,'res_',int2str(k),'.png']);
+%         imwrite(uint8(I), [mask_file,'vis/res_',int2str(k),'.png'])
         
         mask = mask_gbf_d;
 end

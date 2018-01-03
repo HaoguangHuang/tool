@@ -38,7 +38,7 @@ function main_withNodeExtend
         else %cnt > 1
             %======process two neighboring frame(2-3,3-4,...)======
 %             D2 = imread(['./input/Wajueji_2/extractdata_afterDRev/d_',int2str(i+1),'.png']);
-            D2 = imread(['./input/Wajueji_2/2.0/d_',int2str(i+1),'.png']);
+            D2 = imread(['./input/Wajueji_2/dRecvy_use_new_guide/d_',int2str(i+1),'.png']);
             pc1 = pcread(['/home/hhg/Documents/myGithub2/tool/oni2picture_ed2/tankData/MATLAB/node_seg/output/pcd_InfiniTAM/',...
                 'fusioned_pc_',int2str(i),'.pcd']);
             pc2 = transformUVD2XYZ(D2, camera_para);
@@ -115,6 +115,7 @@ function test_pc_fusion(i, pc1, pc2)
     array = [pc1.Location; pc2.Location];
     pc_fusioned = pointCloud(array);
     pc_fusioned = pcdownsample(pc_fusioned, 'gridAverage', 3);
+    pc_fusioned = pcdenoise(pc_fusioned);
     pcwrite(pc_fusioned, ['/home/hhg/Documents/myGithub2/tool/oni2picture_ed2/tankData/MATLAB/node_seg/output/pcd_InfiniTAM/fusioned_pc_',...
         int2str(i+1),'.pcd']);
 end

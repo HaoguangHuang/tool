@@ -1,7 +1,7 @@
 %% SAVE_DEPTH_MASK:depth foreground substraction
 function m = saveDepthMask(fu_bg_d, fu_fg_d, ~, ~, fu_fg_c)
     tic;
-    fb_thres = 60;
+    fb_thres = 80;
     fore_thres = 1500;
     global debug_mode;   global gt;
     
@@ -28,7 +28,10 @@ function m = saveDepthMask(fu_bg_d, fu_fg_d, ~, ~, fu_fg_c)
 %     I(:,:,1) = mat2gray(mask1_d)*255;
 %     if debug_mode, figure(888),imshow(uint8(I));drawnow; end;
     
-    mask1_d = imerode(mask1_d,strel('disk',5));
+    mask1_d = imerode(mask1_d,strel('disk',6));
+%     mask1_d = imerode(mask1_d,strel('disk',5));
+%     mask1_d = imerode(mask1_d,strel('disk',5));
+    
     I(:,:,1) = mat2gray(mask1_d)*255;
     if debug_mode, figure(888),imshow(uint8(I));drawnow; end
     

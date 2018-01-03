@@ -10,9 +10,9 @@ function [warpedPointcloud, nodeGraph, DoF_node_relation_map]= process_first_fra
 %     roi = [-230,inf;-inf,inf;0,980]; %197-198
     roi = [-350,200,-250,100,700,900]; %frame 1    
 
-    if debug_mode, figure(101),pcshow(pc1),title('before ROI filter');  xlabel('x'),ylabel('y'),zlabel('z');end
+    figure(101),pcshow(pc1),title(sprintf('%d, before ROI filter',frame_no));  xlabel('x'),ylabel('y'),zlabel('z');
     pc1 = select(pc1,findPointsInROI(pc1,roi)); % place wajueji in ROI
-    if debug_mode, figure(100),pcshow(pc1),title('after ROI filter');  xlabel('x'),ylabel('y'),zlabel('z');end
+    figure(100),pcshow(pc1),title(sprintf('%d, after ROI filter',frame_no));  xlabel('x'),ylabel('y'),zlabel('z');
     
 %% hierarchical node
     layers = para_set.nodeGraph_layers; 

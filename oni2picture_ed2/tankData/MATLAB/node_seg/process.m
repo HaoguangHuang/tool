@@ -16,7 +16,12 @@ function [warpedPointcloud, nodeGraph]= process(pc1, pc2, para_set, nodeGraph, f
     %======grid filter======
 %     pc1 = pcdownsample(pc1, 'gridAverage', 3); % grid filter. r = 3mm
 %     pc1 = pcdenoise(pc1);
-    
+
+%     roi = [-350,200,-250,100,700,1000];
+%     figure(101),pcshow(pc2),title(sprintf('%d, before ROI filter',frame_no));  xlabel('x'),ylabel('y'),zlabel('z');
+%     pc2 = select(pc2,findPointsInROI(pc2,roi)); % place wajueji in ROI
+%     figure(100),pcshow(pc2),title(sprintf('%d, after ROI filter',frame_no));  xlabel('x'),ylabel('y'),zlabel('z');
+
     %% get node_set_live
     % use nodeGraph to transform nodes from 'frame_no-2' coo into 'frame_no-1' coo
     node_set_updated = update_node(nodeGraph, cnt);

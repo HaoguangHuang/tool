@@ -92,7 +92,7 @@ function warpedPointcloud = get_warped_pointcloud(pc1, pc2, point_corr, camera_p
    warpedPointcloud.Color = repmat(uint8([255,0,0]),warpedPointcloud.Count,1);
    pc2.Color = repmat(uint8([0,0,255]),pc2.Count,1);
    figure(12),pcshow(warpedPointcloud);hold on; pcshow(pc2);hold off;
-   
+   title('warpedPointcloud(R) and pc2(B)');drawnow;
    
 %    pcwrite(warpedPointcloud,... 
 %         ['./node_seg/output/pointcloud/pc_','1','.pcd'],...
