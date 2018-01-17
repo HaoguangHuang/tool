@@ -8,45 +8,50 @@
 function main_withNodeExtend
     Addpath; close all;  
     global debug_mode; debug_mode = 0;    
+%     frame_start = 122; frame_end = 199;
     frame_start = 1; frame_end = 50;
     cnt = 1;
     camera_para = struct('fx',504.261,'fy',503.905,'cx',352.457,'cy',272.202);
     para_set = struct('camera_para',camera_para,...
                         'nodeGraph_layers',4,...
-                        'node_radius',[500,250,200,150]/2,...
-                        'OOR_thres', 300);
+                        'node_radius',[700,250,200,150]/2,...
+                        'OOR_thres', 500);
     nodeGraph_name = ['nodeGraph_',int2str(frame_start),'_',int2str(frame_end)];
     DoF_node_relation_map = [];
     
-%     load('./output/result/nodeGraph_150_199.mat');
+%     load('./output/result/nodeGraph_1_50.mat');
     tic;
-    for i = frame_start:frame_end
+    for i = 1%frame_start:frame_end
         %======process canonical frame and the second frame(1-2)======
         if cnt == 1
-            D1 = imread(['./input/Wajueji_2/dRecvy_use_new_guide/d_',int2str(i),'.png']);
-            D2 = imread(['./input/Wajueji_2/dRecvy_use_new_guide/d_',int2str(i+1),'.png']);
+            D1 = imread(['./input/Wajueji_2/dRecvy_use_new_guide2/d_',int2str(i),'.png']);
+            D2 = imread(['./input/Wajueji_2/dRecvy_use_new_guide2/d_',int2str(i+1),'.png']);
             pc1 = transformUVD2XYZ(D1, camera_para);
             pc2 = transformUVD2XYZ(D2, camera_para);
             [warped_pc, nodeGraph, DoF_node_relation_map]= process_first_frame(pc1, pc2, para_set, i, cnt, DoF_node_relation_map);
 %
-%             eval([nodeGraph_name, '= nodeGraph;']);
-%             if exist(['./output/result/',nodeGraph_name,'.mat'],'file')  % have exist destination file
-%                 delete(['./output/result/',nodeGraph_name,'.mat']);
-%             end
-%             save(['./output/result/',nodeGraph_name,'.mat'],'nodeGraph');
+            eval([nodeGraph_name, '= nodeGraph;']);
+            if exist(['./output/result/',nodeGraph_name,'.mat'],'file')  % have exist destination file
+                delete(['./output/result/',nodeGraph_name,'.mat']);
+            end
+            save(['./output/result/',nodeGraph_name,'.mat'],'nodeGraph');
 
         else %cnt > 1
             %======process two neighboring frame(2-3,3-4,...)======
 %             D2 = imread(['./input/Wajueji_2/extractdata_afterDRev/d_',int2str(i+1),'.png']);
-            D2 = imread(['./input/Wajueji_2/dRecvy_use_new_guide/d_',int2str(i+1),'.png']);
+            D2 = imread(['./input/Wajueji_2/dRecvy_use_new_guide2/d_',int2str(i+1),'.png']);
             pc1 = pcread(['/home/hhg/Documents/myGithub2/tool/oni2picture_ed2/tankData/MATLAB/node_seg/output/pcd_InfiniTAM/',...
                 'fusioned_pc_',int2str(i),'.pcd']);
             pc2 = transformUVD2XYZ(D2, camera_para);
-%             load('../mat_data/nodeGraph.mat','nodeGraph_197'); nodeGraph = nodeGraph_197;
             [warped_pc, nodeGraph]= process(pc1, pc2, para_set, nodeGraph, i, cnt);
-            
-%             eval([nodeGraph_name, '= nodeGraph;']);
-%             save(['./output/result/',nodeGraph_name,'.mat'],'nodeGraph','-append');
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            if warped_pc.Count > 50000
+                warped_pc = pcdownsample(warped_pc,'gridAverage',5);
+            end
+            warped_pc = pcdenoise(warped_pc);
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            eval([nodeGraph_name, '= nodeGraph;']);
+            save(['./output/result/',nodeGraph_name,'.mat'],'nodeGraph','-append');
 
         end
         pcwrite(warped_pc,...
@@ -55,8 +60,8 @@ function main_withNodeExtend
         disp(['get warped cloud combining from frame',int2str(frame_start),'to frame',int2str(i+1)]);
         
         %======Modified InfiniTAM======
-%         modified_InfiniTAM(i); % get integrated live pointcloud
-        test_pc_fusion(i, warped_pc, pc2);
+        modified_InfiniTAM(i); % get integrated live pointcloud
+%         test_pc_fusion(i, warped_pc, pc2);
         
         %======redistribute node to each points in integrated pointcloud======
         disp(['The ',int2str(cnt+1),'th frame have been integrated into volume!']);
@@ -75,9 +80,9 @@ function modified_InfiniTAM(i)
 %     arg2 = ' ../Files/wajueji/Frames_test/%i.ppm'; %no longer be modified
 %     arg3 = ' ../Files/wajueji/Frames_test/%i.pgm'; %no longer be modified
     arg1 = ' /home/hhg/Documents/myGithub2/InfiniTAM_v2_hhg/InfiniTAM/Files/wajueji/calib.txt';
-    arg2 = [' /home/hhg/Documents/myGithub2/tool/oni2picture_ed2/tankData/MATLAB/node_seg/output/imageSource/dRecvy_use_new_guide/',...
+    arg2 = [' /home/hhg/Documents/myGithub2/tool/oni2picture_ed2/tankData/MATLAB/node_seg/output/imageSource/dRecvy_use_new_guide2/',...
         int2str(i+1),'.ppm'];                        %no longer be modified
-    arg3 = [' /home/hhg/Documents/myGithub2/tool/oni2picture_ed2/tankData/MATLAB/node_seg/output/imageSource/dRecvy_use_new_guide/',...
+    arg3 = [' /home/hhg/Documents/myGithub2/tool/oni2picture_ed2/tankData/MATLAB/node_seg/output/imageSource/dRecvy_use_new_guide2/',...
         int2str(i+1),'.pgm'];                        %no longer be modified
     arg4 = ' imu_file_not_exist';                    %no longer be modified
     arg5 = [' -pcd_file /home/hhg/Documents/myGithub2/tool/oni2picture_ed2/tankData/MATLAB/node_seg/output/pcd_fromMatlab/warped_pc_',...
@@ -114,7 +119,7 @@ end
 function test_pc_fusion(i, pc1, pc2)
     array = [pc1.Location; pc2.Location];
     pc_fusioned = pointCloud(array);
-    pc_fusioned = pcdownsample(pc_fusioned, 'gridAverage', 3);
+%     pc_fusioned = pcdownsample(pc_fusioned, 'gridAverage', 3);
     pc_fusioned = pcdenoise(pc_fusioned);
     pcwrite(pc_fusioned, ['/home/hhg/Documents/myGithub2/tool/oni2picture_ed2/tankData/MATLAB/node_seg/output/pcd_InfiniTAM/fusioned_pc_',...
         int2str(i+1),'.pcd']);

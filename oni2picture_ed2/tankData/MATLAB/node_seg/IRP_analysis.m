@@ -11,7 +11,7 @@ function DoF_node_relation_map = IRP_analysis(pc1, pc2, corrIndex, rate, DoF_nod
 end
 
 function DoF_node_relation_map = estimate_mode(pc1, pc2, corrIndex, rate, DoF_node_relation_map)
-    num_samples = 20; % num of choosed unique_corr pair 
+    num_samples = 300; % num of choosed unique_corr pair 
     num_trials = 20;
     Pmat1 = pc1.Location; Pmat2 = pc2.Location;
 
@@ -106,7 +106,7 @@ function visualize_DoF(stat)
     
     n = size(stat, 2);
     %===visualize rotation===
-    close 55;
+%     close 55;
     figure(55); hold on;
     for i = 1:n
         yushu = mod(i,4); shang = floor(i/4);
@@ -117,13 +117,15 @@ function visualize_DoF(stat)
 %     set(gca,'xtick',[-0.6:0.04:0.4]);
 %     set(gca,'ytick',[-0.8:0.04:4]);
 %     set(gca,'ztick',[-0.25:0.04:-0.5]);
-    axis([-0.2,0.2,-0.2,0.2,-0.5,0.5]);
+
+%     axis([-0.2,0.2,-0.2,0.2,-0.5,0.5]);
+    axis square;
     legend('show');
     title('rotation'); 
     xlabel('x'),ylabel('y'),zlabel('z'); 
     hold off;
     %===visualize translation===
-    close 66;
+%     close 66;
     figure(66); hold on;
     for i = 1:n
         yushu = mod(i,4); shang = floor(i/4);
@@ -133,7 +135,8 @@ function visualize_DoF(stat)
     legend('show');
     title('translation');
     xlabel('x'),ylabel('y'),zlabel('z');
-    axis([-60,30,-40,60,-50,50]);
+%     axis([-60,30,-40,60,-50,50]);
+    axis square;
     hold off;
 end
 

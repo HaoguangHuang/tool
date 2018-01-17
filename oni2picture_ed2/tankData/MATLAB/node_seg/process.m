@@ -13,14 +13,6 @@ function [warpedPointcloud, nodeGraph]= process(pc1, pc2, para_set, nodeGraph, f
     layers = para_set.nodeGraph_layers;
     camera_para = para_set.camera_para;
     node_r = para_set.node_radius;
-    %======grid filter======
-%     pc1 = pcdownsample(pc1, 'gridAverage', 3); % grid filter. r = 3mm
-%     pc1 = pcdenoise(pc1);
-
-%     roi = [-350,200,-250,100,700,1000];
-%     figure(101),pcshow(pc2),title(sprintf('%d, before ROI filter',frame_no));  xlabel('x'),ylabel('y'),zlabel('z');
-%     pc2 = select(pc2,findPointsInROI(pc2,roi)); % place wajueji in ROI
-%     figure(100),pcshow(pc2),title(sprintf('%d, after ROI filter',frame_no));  xlabel('x'),ylabel('y'),zlabel('z');
 
     %% get node_set_live
     % use nodeGraph to transform nodes from 'frame_no-2' coo into 'frame_no-1' coo
@@ -36,7 +28,7 @@ function [warpedPointcloud, nodeGraph]= process(pc1, pc2, para_set, nodeGraph, f
     
     %% nodeGraph module 
     %======check how many pts don't belong to any node in the highest layer======
-    if 0
+    if 1
         record = sum(pc_set1_node_index, 2);
         pt_belongTo_noNode_idx = record == 0;
         NEED_TO_ADD_HIGHEST_NEW_NODE = sum(pt_belongTo_noNode_idx) > para_set.OOR_thres;
@@ -87,7 +79,7 @@ function [warpedPointcloud, nodeGraph]= process(pc1, pc2, para_set, nodeGraph, f
     if debug_mode, visualize_energy_map(pc1, pc2, corrIndex, camera_para); end
     
     %% sparse2dense_v2,interpolate sparse unique correspondence point cloud into dense point cloud======
-    warpedPointcloud = get_warped_pointcloud(pc1, pc2, corrIndex, camera_para, Tmat, pc_bestNode_distr);
+    warpedPointcloud = get_warped_pointcloud(pc1, pc2, corrIndex, camera_para, Tmat, pc_bestNode_distr, frame_no);
 
     %% construct a nodeGraph======
     nodeG_thisFrame = cell(1,layers);
@@ -164,6 +156,9 @@ end
 
 function drawNodeSeg(pc,n_r,node_set)
     [x,y,z] = sphere(15);    
+    spec = {'r+','r.','ro','r*','r<','g+','g.','go','g*','g<','b+','b.','bo',...
+        'b*','b<','k+','k.','ko','k*','k<','c+','c.','co','c*','c<','r+','r.','ro','r*','r<'};
+    
     for L = 1:length(n_r)
         figure(L); pcshow(pc);hold on;
         plot3(node_set{L}.Location(:,1),node_set{L}.Location(:,2),node_set{L}.Location(:,3),'r.','markerSize',20);
@@ -176,6 +171,19 @@ function drawNodeSeg(pc,n_r,node_set)
         xlabel('X'),ylabel('Y'),zlabel('Z'); title(['layer ',int2str(L)]);
         hold off;
     end
+
+
+%     for L = 1:length(n_r)
+%         figure(L); pcshow(pc);hold on;
+%         node_num = node_set{L}.Count;
+%         for i = 1:node_num
+%             plot3(node_set{L}.Location(i,1),node_set{L}.Location(i,2),node_set{L}.Location(i,3),spec{i},'markerSize',10)
+%         end
+%         xlabel('X'),ylabel('Y'),zlabel('Z'); title(['layer ',int2str(L)]);
+%         hold off;
+%         legend('show');
+%     end
+    
 end
 
 
@@ -230,7 +238,8 @@ function [Tmat, rmse] = hierarchical_ICP(moving_pc,fixed_pc,layers, node_tree)
         Tmat{L} = cell(1,size(moving_pc{L},2)); rmse{L} = cell(1,size(moving_pc{L},2));
         for n = 1:size(moving_pc{L},2)
             if L == 1 
-                [Tmat{L}{n},~,rmse{L}{n}] = pcregrigid(moving_pc{L}{n},fixed_pc{L}{n},'Metric','pointToPoint','Verbose',true);
+                [Tmat{L}{n},~,rmse{L}{n}] = pcregrigid(moving_pc{L}{n},fixed_pc{L}{n},'Metric','pointToPoint','Verbose',true,...
+                    'InlierRatio',0.75);
                 disp(['--------------now is layer ',int2str(L),' the ',int2str(n),'th node']);
             else % L=2,3,4
                 if moving_pc{L}{n}.Count < 3 || fixed_pc{L}{n}.Count < 3

@@ -1,27 +1,32 @@
 %% DEPTH_RECOVERY: guided depth recovery with fusioned color mask
-function dRecy_with_imrodeGuide(guide, fg_c, fg_d, k, result_file)
-    output_addr = '/home/hhg/Documents/myGithub2/tool/oni2picture_ed2/tankData/MATLAB/node_seg/input/Wajueji_2/dRecvy_use_new_guide/';
-    for k = 1:200
+function dRecy_with_imrodeGuide(guide, fg_c, fg_d, frame_no, result_file)
+    output_addr = '/home/hhg/Documents/myGithub2/tool/oni2picture_ed2/tankData/MATLAB/node_seg/input/Wajueji_2/dRecvy_use_new_guide2/';
+    file = dir('/home/hhg/Downloads/dataSet/Wajueji_2/processedData/1_200/best_mask/*.png');
+    file_num = size(file,1);
+    for k = 1%1:file_num
 %         if nargin<1, mask = imread(['E:\dataSet\Wajueji_2\processedData\182_200\res_',int2str(k),'.png']);end
 %         if nargin<2, fg_c = imread(['E:\dataSet\Wajueji_2\processedData\color\fusionedForegroundData\fusionedForegroundData',int2str(k),'.png',]);end
 %         if nargin<3, fg_d = imread(['E:\dataSet\Wajueji_2\processedData\depth\fusionedForegroundData\fusionedForegroundData',int2str(k),'.png']);end
 %         if nargin<5, result_file = 'E:\dataSet\Wajueji_2\processedData\182_200\result\';end
         
-        
+        file_name = file(k).name;
+        frame_no = sscanf(file_name,'mask_%d.png');
+        frame_no = 36;
         bg_d = imread('/home/hhg/Downloads/dataSet/Wajueji_2/processedData/depth/fusionedBackgroundData/fusionedBackgroundData.png');
         fg_d = imread(sprintf('/home/hhg/Downloads/dataSet/Wajueji_2/processedData/depth/fusionedForegroundData/fusionedForegroundData%d.png',...
-            k));
+            frame_no));
         fg_c = imread(sprintf('/home/hhg/Downloads/dataSet/Wajueji_2/processedData/color/fusionedForegroundData/fusionedForegroundData%d.png',...
-            k));
+            frame_no));
         guide = get_guided(fg_d, bg_d);
         
-        mask = imread(sprintf('/home/hhg/Downloads/dataSet/Wajueji_2/processedData/1_200/houqi/d_%d.png',k));
+        mask = imread(sprintf('/home/hhg/Downloads/dataSet/Wajueji_2/processedData/1_200/best_mask/mask_%d.png',frame_no));
         mask = mask > 0; %binary
         
         %%======depth recovery======
         thres  = 0;
         count = 0;
-        recvy_d = zeros(size(mask));
+%         recvy_d = zeros(size(mask));
+        recvy_d = guide .* double(mask);
         %%=======compute weight_o======
         [~,weight_o,~] = guided_d_recvy_imerodeGuided(mask, fg_c, -1, count, zeros(1,1), guide, recvy_d);
         count = count +1;
@@ -40,16 +45,21 @@ function dRecy_with_imrodeGuide(guide, fg_c, fg_d, k, result_file)
         I(:,:,1) = (guide>0)*255;
         I(:,:,2) = (recvy_d>0)*255;
         I(:,:,3) = mask*255;
-        figure(5),imshow(uint8(I)),title(sprintf('frameNum = %d, guided(R), recvy_d(G), mask(B)',k));drawnow;
+        figure(5),imshow(uint8(I)),title(sprintf('frameNum = %d, guided(R), recvy_d(G), mask(B)',frame_no));drawnow;
         figure(6),imshow(recvy_d,[]),title('recovery depth map');drawnow;
 %         res_c(:,:,1) = fg_c(:,:,1) .* uint8(guide);
 %         res_c(:,:,2) = fg_c(:,:,2) .* uint8(guide);
 %         res_c(:,:,3) = fg_c(:,:,3) .* uint8(guide);
 %         imwrite(uint16(res_d), [result_file,'d_',int2str(k),'.png'])
 %         imwrite(uint8(res_c), [result_file,'c_',int2str(k),'.png'])
-        imwrite(uint16(recvy_d), [output_addr,'d_',int2str(k),'.png']);
-        imwrite(uint8(mat2gray(recvy_d)*255), [output_addr,'vis/d_',int2str(k),'.png'])
-        disp(['processd ',int2str(k)]);
+        
+        c(:,:,1) = fg_c(:,:,1) .* uint8(mask);
+        c(:,:,2) = fg_c(:,:,2) .* uint8(mask);
+        c(:,:,3) = fg_c(:,:,3) .* uint8(mask);
+        imwrite(uint16(recvy_d), [output_addr,'d_',int2str(frame_no),'.png']);
+        imwrite(uint8(mat2gray(recvy_d)*255), [output_addr,'vis/d_',int2str(frame_no),'.png']);
+        imwrite(uint8(c),[output_addr,'c_',int2str(frame_no),'.png']);
+        disp(['processd ',int2str(frame_no)]);
     end
 end
 
@@ -57,7 +67,7 @@ end
 function guide = get_guided(fg_d, bg_d)
     thres = 30;
     mask = abs(bg_d - fg_d) > thres;
-    mask = imerode(mask,strel('disk',5));
+    mask = imerode(mask,strel('disk',3));
     guide = double(fg_d) .* double(mask);
 end
 
@@ -65,7 +75,7 @@ end
 function [recvy_d, weight_o, g_t]= guided_d_recvy_imerodeGuided(mask, fg_c, ~, count_i, weight, guide, d)
     fg_c = double(fg_c);
     [H, W]  =size(mask);  recvy_d = d;
-    win_width = 11;%�������׷���num
+    win_width = 11;
     win_height =11; num_win = win_height*win_height;
     half_w = (win_width-1)/2;
     sigma_c = 8;

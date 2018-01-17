@@ -8,11 +8,12 @@ function [warpedPointcloud, nodeGraph, DoF_node_relation_map]= process_first_fra
     camera_para = para_set.camera_para;
     pc1 = pcdenoise(pc1); pc2 = pcdenoise(pc2); 
 %     roi = [-230,inf;-inf,inf;0,980]; %197-198
-    roi = [-350,200,-250,100,700,900]; %frame 1    
+    roi = [-350,200,-250,100,700,900]; %frame 1 
+%     roi = [-inf,inf;-inf,inf;-inf,inf]; %frame 122
 
-    figure(101),pcshow(pc1),title(sprintf('%d, before ROI filter',frame_no));  xlabel('x'),ylabel('y'),zlabel('z');
+    if debug_mode, figure(101),pcshow(pc1),title(sprintf('%d, before ROI filter',frame_no));  xlabel('x'),ylabel('y'),zlabel('z');end
     pc1 = select(pc1,findPointsInROI(pc1,roi)); % place wajueji in ROI
-    figure(100),pcshow(pc1),title(sprintf('%d, after ROI filter',frame_no));  xlabel('x'),ylabel('y'),zlabel('z');
+    if debug_mode, figure(100),pcshow(pc1),title(sprintf('%d, after ROI filter',frame_no));  xlabel('x'),ylabel('y'),zlabel('z');end
     
 %% hierarchical node
     layers = para_set.nodeGraph_layers; 
@@ -64,12 +65,12 @@ function [warpedPointcloud, nodeGraph, DoF_node_relation_map]= process_first_fra
     if debug_mode, visualize_energy_map(pc1, pc2, corrIndex, camera_para); end
     
 %% IRP_analysis
-%     DoF_node_relation_map = IRP_analysis(pc1, pc2, corrIndex, 0.3, DoF_node_relation_map);
+    DoF_node_relation_map = IRP_analysis(pc1, pc2, corrIndex, 0.3, DoF_node_relation_map);
 %     DoF_node_relation_map = IRP_analysis(pc1, pc2, corrIndex, para_set.OOR_thres, DoF_node_relation_map);
     
     
 %% sparse2dense_v2,interpolate sparse unique correspondence point cloud into dense point cloud
-    warpedPointcloud = get_warped_pointcloud(pc1, pc2, corrIndex, camera_para, Tmat, pc_bestNode_distr);
+    warpedPointcloud = get_warped_pointcloud(pc1, pc2, corrIndex, camera_para, Tmat, pc_bestNode_distr,frame_no);
 
     %======construct a nodeGraph======
     nodeG_thisFrame = cell(1,layers);
@@ -158,7 +159,7 @@ function [Tmat, rmse] = hierarchical_ICP(moving_pc,fixed_pc,layers, node_tree)
                     Tmat{L}{n} = Tmat{L-1}{node_tree{L}(n)};
                     rmse{L}{n} = inf;
                     disp(['--------------now is layer ',int2str(L),' the ',int2str(n),'th node']);
-                    break;
+                    continue;
                 end
                 [Tmat{L}{n},~,rmse{L}{n}] = pcregrigid(moving_pc{L}{n},fixed_pc{L}{n},'Metric','pointToPoint','Verbose',true,...
                     'InitialTransform',Tmat{L-1}{node_tree{L}(n)});
