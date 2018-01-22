@@ -23,32 +23,39 @@ hold off;
 xlabel('x'),ylabel('y'),zlabel('z');
 title('teapot in camera coo');
 
-roi = [-inf,inf;-inf,inf;0,1.6*1000];
-teapot_roi = pointCloud(teapot_c);
-teapot_roi = select(teapot_roi,findPointsInROI(teapot_roi,roi)); % place wajueji in ROI
-figure(56),pcshow(teapot_roi);hold on;
+% roi = [-inf,inf;-inf,inf;0,1.6*1000];
+% teapot_roi = pointCloud(teapot_c);
+% teapot_roi = select(teapot_roi,findPointsInROI(teapot_roi,roi)); % place wajueji in ROI
+
+figure(66),pcshow(pointCloud(teapot_c));hold on;
 plot3(0,0,0,'r.','MarkerSize',20);
 hold off;
 xlabel('x'),ylabel('y'),zlabel('z');
 title('teapot_ROI in camera coo');
 
 % 
-D = zbuffer_forward_proj(teapot_roi.Location,camera_para);
+D = zbuffer_forward_proj(teapot_c,camera_para);
 % D_output = imrotate(D,180); %% save 2
-D_output = D;
-figure(44),imshow(D_output,[]),title('projected teapot');
+D1 = D;
+figure(44),imshow(D1,[]),title('projected teapot,zbuffer');
+pc_visible = transformUVD2XYZ(D1,camera_para);
+figure(55),pcshow(pc_visible),title('pc visible,zbuffer');
 
-pc_visible = transformUVD2XYZ(D_output,camera_para);
-figure(55),pcshow(pc_visible),title('pc invisible');
+step = 5;
+D2 = zbuffer_forward_proj_pointSpliting(teapot_c,camera_para,step);
+figure(45),imshow(D2,[]),title('projected teapot,point spliting');
+pc_pointSpling = transformUVD2XYZ(D2,camera_para);
+figure(56),pcshow(pc_pointSpling),title(sprintf('pc pointsplting,step=%d',step));
 
-imwrite(uint16(D_output),'./input/teapot/tp.pgm');
-pcwrite(pointCloud(teapot_c),'./input/teapot/tp.pcd');
 
-function D = zbuffer_forward_proj(pc,camera_para)
+% imwrite(uint16(D_output),'./input/teapot/tp.pgm');
+% pcwrite(pointCloud(teapot_c),'./input/teapot/tp.pcd');
+
+function D = zbuffer_forward_proj(data,camera_para)
     D = ones(480,640)*inf;
     cnt = 0; %count the nonunique_nonproj points
-    for i = 1:size(pc,1)
-        x = pc(i,1); y = pc(i,2); z = pc(i,3);
+    for i = 1:size(data,1)
+        x = data(i,1); y = data(i,2); z = data(i,3);
         u = round(x/z*camera_para.fx + camera_para.cx + 0.5);
         v = round(y/z*camera_para.fy + camera_para.cy + 0.5);
         d = z;
@@ -56,6 +63,32 @@ function D = zbuffer_forward_proj(pc,camera_para)
         if D(v,u) > d % the i_th point is not occluded
             D(v,u) = d;
         end    
+        cnt = cnt + 1; 
+    end
+    D(D==inf) = 0;
+end
+
+
+function D = zbuffer_forward_proj_pointSpliting(pc,camera_para,step)
+    D = ones(480,640)*inf;
+    cnt = 0; %count the nonunique_nonproj points
+    for i = 1:size(pc,1)
+        x = pc(i,1); y = pc(i,2); z = pc(i,3);
+%         u = round(x/z*camera_para.fx + camera_para.cx + 0.5);
+%         v = round(y/z*camera_para.fy + camera_para.cy + 0.5);
+        u = round(x/z*camera_para.fx + camera_para.cx);
+        v = round(y/z*camera_para.fy + camera_para.cy);
+%         u_upper = ceil(u); v_upper = ceil(v);
+%         u_lower = floor(u); v_lower = floor(v);
+        d = z;
+        if u < step+1 || u > 640-step || v < step+1 || v > 480-step, continue; end
+        for i = -step:step
+            for j = -step:step
+                if D(v+j,u+i) > d % the i_th point is not occluded
+                    D(v+j,u+i) = d;
+                end
+            end
+        end
         cnt = cnt + 1; 
     end
     D(D==inf) = 0;

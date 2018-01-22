@@ -45,6 +45,7 @@ function main_withNodeExtend
             pc2 = transformUVD2XYZ(D2, camera_para);
             [warped_pc, nodeGraph]= process(pc1, pc2, para_set, nodeGraph, i, cnt);
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            %放到这里是为了让更多的点能参与上面模块的ICP
             if warped_pc.Count > 50000
                 warped_pc = pcdownsample(warped_pc,'gridAverage',5);
             end

@@ -18,10 +18,12 @@
 % figure(6),pcshow(warped_pc),title('warped_pc');
 
 
- pc_with_pcdownsample = pcread('./output/pcd_InfiniTAM/122_200_without_pcmerge/fusioned_pc_135.pcd');
- figure(44),pcshow(pc_with_pcdownsample),title('fusioned_pc_135,with pcdownsample');
- pc1 = pcdownsample(warped_pc,'gridAverage',3);
-figure(55),pcshow(pc1),title('warped_pc_134');
+%test how zbuffer+transformationMap work
+pc = pcread('./output/pcd_InfiniTAM/20180116_1632/fusioned_pc_132.pcd');
+figure(15),pcshow(pc);
+
+
+
 
 function p = transformUVD2XYZ(d, c_pa)
     [H, W] = size(d);

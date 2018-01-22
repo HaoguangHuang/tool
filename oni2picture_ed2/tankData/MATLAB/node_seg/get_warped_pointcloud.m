@@ -53,7 +53,6 @@ function warpedPointcloud = get_warped_pointcloud(pc1, pc2, point_corr, camera_p
     [~, D1, ~, idx_map1]= transformXYZ2UVDI(xyzidx_pc1, camera_para, y_pc1, unique_corr);
     transformationMap1 = idx_to_transformation(idx_map1, pc_bestNode_distr, Tmat);
     
-    
     %D2:pointCloud1中所有不拥有unique_correspondence的点的投影uvd. the point not been occluded  
     %Y2:pointCloud1中所有不拥有unique_correspondence的点的投影uvY
     %idx_map2:记录D2中投影点(都有unique_corr)在pc1中的对应corr
@@ -62,7 +61,23 @@ function warpedPointcloud = get_warped_pointcloud(pc1, pc2, point_corr, camera_p
 %     y_pc1 = xyz_pc1_nonunique.Color(:,1); 
     xyzidx_pc1 = [xyz_pc1_nonunique.Location(:,:), not_unique_corr(:,1)];
     [D2, idx_map2, nonunique_nonproj] = zbuffer_forward_proj(xyzidx_pc1,camera_para,pc1);
-%     [~, D2, ~, idx_map2]= transformXYZ2UVDI(xyzidx_pc1, camera_para, y_pc1, unique_corr);
+%     [D2, idx_map2, nonunique_nonproj] = zbuffer_pointSpliting(xyzidx_pc1,camera_para,pc1);
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     D2_zeros = D2; D2_zeros(D2_zeros==inf) = 0;
+%     pc_D2_zeros = transformUVD2XYZ(D2_zeros,camera_para);
+%     figure(31),pcshow(pc_D2_zeros),hold on;
+%     plot3(0,0,0,'ro','Markersize',10);
+%     hold off; title(sprintf('point spliting,pts=%d',pc_D2_zeros.Count));
+%     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     %visualize nonunique_nonproj points
+%     pc_nonunique_nonproj = select(pc1,nonunique_nonproj);
+%     figure(45),pcshow(pc_nonunique_nonproj),hold on;
+%     plot3(0,0,0,'ro','Markersize',10);
+%     hold off; title(sprintf('pc nonunique nonproj, pts=%d',pc_nonunique_nonproj.Count));
+%     
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
    
 %    transformationMap = tripple_guided_JBF_v3(D1, D3, Y1, Y3, mask, transformationMap1, transformationMap2);
 
@@ -122,6 +137,84 @@ function warped_pc = warp(pc, idx_map, transformationMap)
     end
     warped_pc = warped_pc(1:cnt,:);
     warped_pc = pointCloud(warped_pc);
+end
+
+
+function [D, idx_map, nonunique_nonproj] = zbuffer_pointSpliting(xyzidx_pc,camera_para,pc_total)
+    D_mask = ones(480,640)*inf; idx_map = zeros(480,640);
+    D = ones(480,640)*inf;
+    nonunique_nonproj = zeros(size(xyzidx_pc,1),1); 
+    cnt = 0;%count the nonunique_nonproj points
+    step = 1;
+    thres = 10;%mm
+    for n = 1:size(xyzidx_pc,1)
+        x = xyzidx_pc(n,1); y = xyzidx_pc(n,2); z = xyzidx_pc(n,3);
+        u = round(x/z*camera_para.fx + camera_para.cx + 0.5);
+        v = round(y/z*camera_para.fy + camera_para.cy + 0.5);
+        d = z;
+        
+        if v < step || u < step || v > 480-step || u > 640 - step, continue; end
+        for i = -step:step
+            for j = -step:step
+                if (i==0&&j==0)&&(idx_map(v+j,u+i)~=0) %father--father
+                    if D_mask(v+j,u+i) > d
+                        D_mask(v+j,u+i) = d;
+                        cnt = cnt + 1;
+                        nonunique_nonproj(cnt,1) = idx_map(v+j,u+i);
+                        idx_map(v+j,u+i) = xyzidx_pc(n,4);
+                        D(v+j,u+i) = d;
+                    else
+                        cnt = cnt + 1;
+                        nonunique_nonproj(cnt,1) = xyzidx_pc(n,4);
+                    end
+                elseif  (i==0&&j==0)&&(idx_map(v+j,u+i)==0)%father--son
+                    if abs(D_mask(v+j,u+i)-d)<thres
+                        D_mask(v+j,u+i) = d;
+                        idx_map(v+j,u+i) = xyzidx_pc(n,4);
+                        D(v+j,u+i) = d;
+                        continue;
+                    end
+                    
+                    if D_mask(v+j,u+i) > d
+                        D_mask(v+j,u+i) = d;
+                        idx_map(v+j,u+i) = xyzidx_pc(n,4);
+                        D(v+j,u+i) = d;
+                    else
+                        cnt = cnt + 1;
+                        nonunique_nonproj(cnt,1) = xyzidx_pc(n,4);
+                    end
+                elseif (i~=0||j~=0)&&(idx_map(v+j,u+i)~=0)%son--father
+                    if abs(D_mask(v+j,u+i)-d) < thres
+                        continue;
+                    end
+                    if D_mask(v+j,u+i) > d
+                        D_mask(v+j,u+i) = d;
+                        cnt = cnt + 1;
+                        nonunique_nonproj(cnt,1) = idx_map(v+j,u+i);
+                        idx_map(v+j,u+i) = 0;
+                        D(v+j,u+i) = inf;
+                    else
+                        continue;
+                    end
+                elseif (i~=0||j~=0)&&(idx_map(v+j,u+i)==0)%son--son
+                    if D_mask(v+j,u+i) > d
+                        D_mask(v+j,u+i) = d;
+                    else
+                        continue;
+                    end
+                else     
+                    error('-------bad point!!--------'); 
+                end
+                
+            end
+        end
+        
+    end
+    nonunique_nonproj = nonunique_nonproj(1:cnt,1);
+    nonunique_nonproj = sort(nonunique_nonproj);
+    
+    
+    
 end
 
 
@@ -207,6 +300,19 @@ function transformationMap = idx_to_transformation(idx_map, pc_bestNode_distr, T
 end
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
 
-
-
+function p = transformUVD2XYZ(d, c_pa)
+    [H, W] = size(d);
+    d = double(d);
+    p_array(:,3) = reshape(d,H*W,1);        %z can obtain from var d 
+    for u = 1:W
+        for v = 1:H
+            p_array((u-1)*H+v,1) = (u - c_pa.cx) * d(v,u)/ c_pa.fx;
+            p_array((u-1)*H+v,2) = (v - c_pa.cy) * d(v,u)/ c_pa.fy;
+        end
+    end
+    index = p_array(:,3)>0;
+ 
+    p_array = p_array(index,:); 
+    p = pointCloud(p_array);
+end
 
