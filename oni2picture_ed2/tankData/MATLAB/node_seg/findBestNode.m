@@ -49,18 +49,18 @@ function [outlier_index, pc_bestNode_distr] = findBestNode(pc1, pc2, Tmat, pc_se
     end
     
     %%===========visualize relation between inlier rate and thres value==========
-    count = 1;t_thres = 0:0.1:3; inliner_rate = zeros(1,size(t_thres,2));
-    for t = t_thres
-    inlier_rate(1,count) = sum(dd(dd(:,2)<inf,2)<t,1)/pc1.Count;     % here point controlled by none node is regarded as outlier
-    count = count + 1;
-    end
     if debug_mode
+        count = 1;t_thres = 0:0.1:3; inliner_rate = zeros(1,size(t_thres,2));
+        for t = t_thres
+        inlier_rate(1,count) = sum(dd(dd(:,2)<inf,2)<t,1)/pc1.Count;     % here point controlled by none node is regarded as outlier
+        count = count + 1;
+        end
         figure(100),bar(t_thres,inlier_rate,0.4);xlabel('thres/mm');ylabel('inlier rate');title('ICP result of layer 4');grid on;
     end
     %%===========visualize outlier in pc1=================
-    pc1_outlier = select(pc1,outlier_index(outlier_index(:,2)==1,1));% here point controlled by none node is regarded as inlier
-    pc1_outlier.Color = repmat(uint8([255,0,0]),pc1_outlier.Count,1);
     if debug_mode
+        pc1_outlier = select(pc1,outlier_index(outlier_index(:,2)==1,1));% here point controlled by none node is regarded as inlier
+        pc1_outlier.Color = repmat(uint8([255,0,0]),pc1_outlier.Count,1);
         figure(101);pcshow(pc1);hold on; pcshow(pc1_outlier);title(['outlier(red) in pc1, thres=',num2str(thres),'mm']);hold off;
     end
     

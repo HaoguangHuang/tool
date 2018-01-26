@@ -18,10 +18,43 @@
 % figure(6),pcshow(warped_pc),title('warped_pc');
 
 
-%test how zbuffer+transformationMap work
-pc = pcread('./output/pcd_InfiniTAM/20180116_1632/fusioned_pc_132.pcd');
-figure(15),pcshow(pc);
+%================test pcdenoise==================
+% pc = pcread('./output/pcd_InfiniTAM/fusioned_pc_51.pcd');
+% pc.Color = repmat(uint8([0,0,255]),pc.Count,1);
+% figure(15),pcshow(pc),title(sprintf('original pc, pts=%d',pc.Count));
+% [pc_d1, in_idx1, out_idx1] = pcdenoise(pc);
+% pc_out1 = select(pc,out_idx1); pc_out1.Color = repmat(uint8([255,0,0]),pc_out1.Count,1);
+% pc_in1 = select(pc,in_idx1);
+% figure(16),pcshow(pc_d1),hold on;
+% pcshow(pc_out1,'MarkerSize',10);
+% title(sprintf('pcdenoise(pc), pts=%d',pc_d1.Count));
+% hold off;
+% figure(18),pcshow(pc_in1),title(sprintf('inlier of pcdenoise, pts=%d',pc_in1.Count));
+% 
+% NumNeighbors = 2;
+% thres = 0.5; %mm
+% 
+% [pc_d2, in_idx2,out_idx2]= pcdenoise(pc,'NumNeighbors',NumNeighbors,'Threshold',thres);
+% pc_out2 = select(pc,out_idx2); pc_out2.Color = repmat(uint8([255,0,0]),pc_out2.Count,1);
+% pc_in2 = select(pc, in_idx2);
+% figure(17),pcshow(pc_d2); hold on;
+% pcshow(pc_out2,'MarkerSize',10);
+% title(sprintf('NumNeighbors=%d, Threshold=%d,pts=%d',NumNeighbors,thres,...
+%     pc_d2.Count));
+% hold off;
+% figure(19),pcshow(pc_in2),title(sprintf('inlier of pcdenoise2, pts=%d',pc_in2.Count));
 
+%================test radius filter of pcdownsample===============
+pc = pcread('./output/pcd_InfiniTAM/fusioned_pc_51.pcd');
+pc.Color = repmat(uint8([0,0,255]),pc.Count,1);
+r = 5;
+pc_gf = pcdownsample(pc,'gridAverage',r);
+
+step = ceil(pc.Count/50000);
+idx = 1:step:pc.Count;
+pc_stepDowns = select(pc,idx);
+figure(21),pcshow(pc_gf),title(sprintf('grid Average, r =%d ,inlier pts=%d',r,pc_gf.Count));
+figure(22),pcshow(pc_stepDowns),title(sprintf('step downsample, step=%d, inlier pts=%d',step,pc_stepDowns.Count));
 
 
 

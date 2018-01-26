@@ -14,14 +14,16 @@ function main_withNodeExtend
     camera_para = struct('fx',504.261,'fy',503.905,'cx',352.457,'cy',272.202);
     para_set = struct('camera_para',camera_para,...
                         'nodeGraph_layers',4,...
-                        'node_radius',[700,250,200,150]/2,...
-                        'OOR_thres', 500);
+                        'node_radius',[1000,250,200,150]/2,...   %[1000,250,200,150]/2
+                        'OOR_thres', 500,...
+                        'windowSize',3,...
+                        'radius_coff',1.30);
     nodeGraph_name = ['nodeGraph_',int2str(frame_start),'_',int2str(frame_end)];
     DoF_node_relation_map = [];
     
 %     load('./output/result/nodeGraph_1_50.mat');
     tic;
-    for i = 1%frame_start:frame_end
+    for i = frame_start:frame_end
         %======process canonical frame and the second frame(1-2)======
         if cnt == 1
             D1 = imread(['./input/Wajueji_2/dRecvy_use_new_guide2/d_',int2str(i),'.png']);
@@ -41,15 +43,24 @@ function main_withNodeExtend
 %             D2 = imread(['./input/Wajueji_2/extractdata_afterDRev/d_',int2str(i+1),'.png']);
             D2 = imread(['./input/Wajueji_2/dRecvy_use_new_guide2/d_',int2str(i+1),'.png']);
             pc1 = pcread(['/home/hhg/Documents/myGithub2/tool/oni2picture_ed2/tankData/MATLAB/node_seg/output/pcd_InfiniTAM/',...
-                'fusioned_pc_',int2str(i),'.pcd']);
+                '20180124_1950/fusioned_pc_',int2str(i),'.pcd']);
             pc2 = transformUVD2XYZ(D2, camera_para);
             [warped_pc, nodeGraph]= process(pc1, pc2, para_set, nodeGraph, i, cnt);
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            %放到这里是为了让更多的点能参与上面模块的ICP
+            %放到这里是为了让更多的点能参与上面模块的ICP   
+%             --------20180120-------
+%             while warped_pc.Count > 50000
+%                 warped_pc = pcdownsample(warped_pc,'gridAverage',3);
+%             end
+%             warped_pc = pcdenoise(warped_pc);
+
+            %-----20180124_1950-----
             if warped_pc.Count > 50000
-                warped_pc = pcdownsample(warped_pc,'gridAverage',5);
+                step = 2;
+                idx = 1:step:warped_pc.Count;
+                warped_pc = select(warped_pc,idx);
             end
-            warped_pc = pcdenoise(warped_pc);
+%             warped_pc = pcdenoise(warped_pc,'NumNeighbors',2,'Threshold',0.5);
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             eval([nodeGraph_name, '= nodeGraph;']);
             save(['./output/result/',nodeGraph_name,'.mat'],'nodeGraph','-append');
@@ -61,8 +72,8 @@ function main_withNodeExtend
         disp(['get warped cloud combining from frame',int2str(frame_start),'to frame',int2str(i+1)]);
         
         %======Modified InfiniTAM======
-        modified_InfiniTAM(i); % get integrated live pointcloud
-%         test_pc_fusion(i, warped_pc, pc2);
+%         modified_InfiniTAM(i); % get integrated live pointcloud
+        test_pc_fusion(i, warped_pc, pc2);
         
         %======redistribute node to each points in integrated pointcloud======
         disp(['The ',int2str(cnt+1),'th frame have been integrated into volume!']);
@@ -121,7 +132,7 @@ function test_pc_fusion(i, pc1, pc2)
     array = [pc1.Location; pc2.Location];
     pc_fusioned = pointCloud(array);
 %     pc_fusioned = pcdownsample(pc_fusioned, 'gridAverage', 3);
-    pc_fusioned = pcdenoise(pc_fusioned);
+%     pc_fusioned = pcdenoise(pc_fusioned);
     pcwrite(pc_fusioned, ['/home/hhg/Documents/myGithub2/tool/oni2picture_ed2/tankData/MATLAB/node_seg/output/pcd_InfiniTAM/fusioned_pc_',...
         int2str(i+1),'.pcd']);
 end

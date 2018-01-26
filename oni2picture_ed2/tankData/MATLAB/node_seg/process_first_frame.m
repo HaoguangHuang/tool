@@ -6,6 +6,7 @@
 function [warpedPointcloud, nodeGraph, DoF_node_relation_map]= process_first_frame(pc1, pc2, para_set, frame_no, cnt, DoF_node_relation_map)
     global debug_mode;
     camera_para = para_set.camera_para;
+    radius_coff = para_set.radius_coff;
     pc1 = pcdenoise(pc1); pc2 = pcdenoise(pc2); 
 %     roi = [-230,inf;-inf,inf;0,980]; %197-198
     roi = [-350,200,-250,100,700,900]; %frame 1 
@@ -22,8 +23,11 @@ function [warpedPointcloud, nodeGraph, DoF_node_relation_map]= process_first_fra
     for L = 1:layers
         node_set{L} = pcdownsample(pc1, 'gridAverage', node_r(L)*2); % get position of nodes in each layer
     end
+    
+    %======attach new node to its NN point in pointcloud======
+    node_set = attach_new_node_to_NNP(node_set, pc1, layers);
     %=============visualize result of node segmentation=============%
-    if debug_mode, drawNodeSeg(pc1,node_r,node_set); drawNodeSeg(pc1,node_r*1.25,node_set); end
+    if debug_mode, drawNodeSeg(pc1,node_r,node_set); drawNodeSeg(pc1,node_r*radius_coff,node_set); end
     
     
 %% create hierarchical node tree
@@ -31,7 +35,7 @@ function [warpedPointcloud, nodeGraph, DoF_node_relation_map]= process_first_fra
     
     
 %% find pointcloud belongs to each node
-    node_r_pc1 = node_r*1.25; node_r_pc2 = node_r*1.25*1.1;
+    node_r_pc1 = node_r*radius_coff; node_r_pc2 = node_r*radius_coff*1.1;
     [pc_set1, pc_set1_node_index]= distr_pc(pc1,node_r_pc1,node_set,layers,1);  %distribute pointcloud
     [pc_set2, ~]= distr_pc(pc2,node_r_pc2,node_set,layers,2);
     
@@ -65,7 +69,7 @@ function [warpedPointcloud, nodeGraph, DoF_node_relation_map]= process_first_fra
     if debug_mode, visualize_energy_map(pc1, pc2, corrIndex, camera_para); end
     
 %% IRP_analysis
-    DoF_node_relation_map = IRP_analysis(pc1, pc2, corrIndex, 0.3, DoF_node_relation_map);
+%     DoF_node_relation_map = IRP_analysis(pc1, pc2, corrIndex, 0.3, DoF_node_relation_map);
 %     DoF_node_relation_map = IRP_analysis(pc1, pc2, corrIndex, para_set.OOR_thres, DoF_node_relation_map);
     
     
@@ -75,7 +79,8 @@ function [warpedPointcloud, nodeGraph, DoF_node_relation_map]= process_first_fra
     %======construct a nodeGraph======
     nodeG_thisFrame = cell(1,layers);
     for i = 1:layers
-        nodeG_thisFrame{i} = {Tmat{i}',node_set{i}.Location(:,:)};
+%         nodeG_thisFrame{i} = {Tmat{i}',node_set{i}.Location(:,:)};
+        nodeG_thisFrame{i} = {Tmat{i}',node_set{i}.Location(:,:),ones(node_set{i}.Count,1)*frame_no};
     end
     nodeGraph = cell(1,2);
     nodeGraph(cnt,:) = {frame_no, nodeG_thisFrame};
@@ -195,5 +200,17 @@ function edge = findConnection(son,parent)
     [~, edge] = min(sum(dist,2)); % need not to sqrt
 end
 
-
+%% ATTACH_NEW_NODE_TO_NNP
+function node_set = attach_new_node_to_NNP(node_set, pc1, layers)
+    for L = 1:layers
+        array = zeros(node_set{L}.Count,3);
+        for n = 1:node_set{L}.Count
+            node_pos = node_set{L}.Location(n,:);
+            [indice,~] = findNearestNeighbors(pc1,node_pos,1);
+            new_pos = pc1.Location(indice,:);
+            array(n,:) = new_pos;
+        end
+        node_set{L} = pointCloud(array);
+    end
+end
 
