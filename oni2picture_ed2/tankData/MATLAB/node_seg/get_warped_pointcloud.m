@@ -38,7 +38,7 @@ function warpedPointcloud = get_warped_pointcloud(pc1, pc2, point_corr, camera_p
     if nargin < 6, load('pc_bestNode_distr.mat');
         pc_bestNode_distr = pc_bestNode_distr_wc03; clear pc_bestNode_distr_wc03; 
     end
-    
+    global debug_mode;
     %%======投影经过POI滤波的pc1_inCoo2到相机平面======
     unique_corr = point_corr(point_corr(:,2)>0,:);
     not_unique_corr = point_corr(point_corr(:,2)==0,:);
@@ -60,6 +60,7 @@ function warpedPointcloud = get_warped_pointcloud(pc1, pc2, point_corr, camera_p
     xyz_pc1_nonunique = select(pc1,not_unique_corr(:,1));
 %     y_pc1 = xyz_pc1_nonunique.Color(:,1); 
     xyzidx_pc1 = [xyz_pc1_nonunique.Location(:,:), not_unique_corr(:,1)];
+    
 %     [D2, idx_map2, nonunique_nonproj] = zbuffer_forward_proj(xyzidx_pc1,camera_para,pc1);
     [D2, idx_map2, nonunique_nonproj] = zbuffer_pointSpliting(xyzidx_pc1,camera_para,pc1);
     
@@ -93,9 +94,32 @@ function warpedPointcloud = get_warped_pointcloud(pc1, pc2, point_corr, camera_p
    warped_pc_have_trans1 = warp(pc1, idx_map1, transformationMap1);
    warped_pc_have_trans2 = warp(pc1, idx_map2, transformationMap2);
    
+   %======downsample the visible point======
+   warped_pc_have_trans1 = pcdownsample(warped_pc_have_trans1,'gridAverage',3);
+   warped_pc_have_trans2 = pcdownsample(warped_pc_have_trans2,'gridAverage',3);
+   
+   if debug_mode
+       warped_pc_have_trans1.Color = repmat(uint8([255,0,0]),warped_pc_have_trans1.Count,1);
+       warped_pc_have_trans2.Color = repmat(uint8([255,0,0]),warped_pc_have_trans2.Count,1);
+       pc_nonunique_nonproj = select(pc1,nonunique_nonproj);
+       pc_nonunique_nonproj.Color = repmat(uint8([0,0,255]),pc_nonunique_nonproj.Count,1);
+       figure(44),pcshow(warped_pc_have_trans1),title('unique\_corr');
+       figure(45),pcshow(pc2),title('pc2');
+       figure(46),pcshow(warped_pc_have_trans2),title('pc\_nonunique\_proj');
+
+       figure(47),pcshow(warped_pc_have_trans1);hold on;
+       pcshow(warped_pc_have_trans2); pcshow(pc_nonunique_nonproj);
+       hold off; title('visible pts(R), invisible(blue)');
+
+       figure(48),pcshow(pc_nonunique_nonproj),hold on;
+       plot3(0,0,0,'ro','markersize',10);
+       title('invisible'); hold off;
+   end
 %    warped_pc_use_top_node = warp_use_top_node();
    pc_use_top_node = select(pc1,nonunique_nonproj);
-   warped_pc_use_top_node = pctransform(pc_use_top_node,Tmat{1}{1});
+   warped_pc_use_top_node = pctransform(pc_use_top_node,Tmat{1}{1});%error. Node in lowest layer may be more than one
+%    warped_pc_use_top_node = warp_Invisible_Pts(nonunique_nonproj,Tmat,pc_bestNode_distr,pc1);
+   
    
    %%combine all the warped pts
 %    warpedPointcloud = pcmerge(warped_pc_have_trans1,warped_pc_have_trans2,3); %3mm
@@ -111,9 +135,29 @@ function warpedPointcloud = get_warped_pointcloud(pc1, pc2, point_corr, camera_p
    pcshow(warpedPointcloud);hold on; pcshow(pc2);hold off;
    title(sprintf('warpedPointcloud(R,%d) and pc2(B,%d)',frame_no,frame_no+1));drawnow;
    name = sprintf('./output/result/figFile/fusioned_warped_pc%d_and_pc%d.fig',frame_no,frame_no+1);
-%    saveas(tmp,name);
+   saveas(tmp,name);
    
 end
+
+% have bad effect
+function warped_pc = warp_Invisible_Pts(nonunique_nonproj,Tmat,pc_bestNode_distr,pc)  
+    layers = size(Tmat,2);
+    num = size(nonunique_nonproj,1);
+    array = zeros(num,3);
+    cnt = 0;
+    for i = 1:num
+        idx = nonunique_nonproj(i,1);
+        bestNode = pc_bestNode_distr(idx,1);
+        if bestNode == 0, continue; end %不属于任何一个最高层node的point，一般是噪声点，直接丢弃
+        cnt = cnt + 1;
+        p = pc.Location(idx,:);
+        T = Tmat{1,layers}{bestNode};
+        p_afterTrans = transformPointsForward(T,p);
+        array(cnt,:) = p_afterTrans;
+    end
+    warped_pc = pointCloud(array(1:cnt,:));
+end
+
 
 
 function warped_pc = warp(pc, idx_map, transformationMap)

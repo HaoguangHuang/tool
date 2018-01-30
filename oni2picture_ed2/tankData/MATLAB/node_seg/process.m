@@ -22,6 +22,10 @@ function [warpedPointcloud, nodeGraph]= process(pc1, pc2, para_set, nodeGraph, f
     node_set_updated = update_node_mean_window(nodeGraph, cnt, windowSize, frame_no);
     fprintf('update_node_mean_window time = %d\n',toc);
 
+    for L = 1:layers
+        node_set_updated{1,L} = attach_new_node_to_NNP(node_set_updated{1,L},pc1);
+    end
+    
     %=============visualize result of node segmentation=============%
     if debug_mode, drawNodeSeg(pc1,node_r,node_set_updated); drawNodeSeg(pc1,node_r*radius_coff,node_set_updated); end
     
@@ -421,8 +425,12 @@ function node_added_set = excludeAddedNodes(node_added_set, pc1, para_set)
         end
     end
     %===距离太近的node合并===
-    node_added_set = pcdownsample(pointCloud(node_array(:,1:3)),'gridAverage',2*r);
-    node_added_set = attach_new_node_to_NNP(node_added_set, pc1);
+    if ~isempty(node_added_set)
+        node_added_set = pcdownsample(pointCloud(node_array(:,1:3)),'gridAverage',2*r);
+        node_added_set = attach_new_node_to_NNP(node_added_set, pc1);
+    else
+        node_added_set = [];
+    end
 %     
 %     figure(22),pcshow(pc1),hold on;
 %     plot3(node_array(:,1),node_array(:,2),node_array(:,3),'ro','Markersize',10);
