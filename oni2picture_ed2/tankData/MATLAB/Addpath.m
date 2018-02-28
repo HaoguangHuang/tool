@@ -10,3 +10,5 @@
 
 addpath(genpath('/home/hhg/Documents/matlab_thirdparty_lib'));
 
+addpath(genpath('/home/hhg/Documents/HNU_guid/GFF_1.0'));
+
