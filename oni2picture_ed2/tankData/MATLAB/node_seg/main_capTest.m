@@ -5,12 +5,14 @@
 %
 % Mention:It is necessary to change your folder into ./node_seg before execute this main.m
 % 此main函数，包含nodeGraph管理以及自由度分析模块，可以处理不含自旋转的数据集
-function main_withNodeExtend
-    Addpath; close all;  
-    global debug_mode; debug_mode = 0;    
+function main_capTest
+    Addpath; close all; clear all;
+    global debug_mode; debug_mode = 0;   
+    global dateTime; 
+    global figFile; global pcd_fromMatlab_File; global pcd_InfiniTAM;
 %     frame_start = 122; frame_end = 199;
     frame_start = 1; frame_end = 50;
-    cnt = 1;
+    cnt = 49;
     camera_para = struct('fx',504.261,'fy',503.905,'cx',352.457,'cy',272.202);
     para_set = struct('camera_para',camera_para,...
                         'nodeGraph_layers',4,...
@@ -18,17 +20,31 @@ function main_withNodeExtend
                         'OOR_thres', 500,...
                         'windowSize',3,...
                         'radius_coff',1.30);
-    nodeGraph_name = ['nodeGraph_',int2str(frame_start),'_',int2str(frame_end)];
+    
+%     t = fix(clock);
+%     dateTime = sprintf('%d%02d%02d_%02d%02d',t(1),t(2),t(3),t(4),t(5));
+    dateTime = '20180310_1153';
+    load(sprintf('./output/result/nodeGraph_1_50_%s.mat',dateTime));
+    
+    
+    nodeGraph_name = ['nodeGraph_',int2str(frame_start),'_',int2str(frame_end),'_',dateTime];
+%     nodeGraph_name = ['nodeGraph_',int2str(1),'_',int2str(50),'_',dateTime];
     DoF_node_relation_map = [];
     
+    pcd_fromMatlab_File = sprintf('./output/pcd_fromMatlab/%s',dateTime);
+    pcd_InfiniTAM = sprintf('./output/pcd_InfiniTAM/%s',dateTime);
+    figFile = sprintf('./output/result/figFile_%s',dateTime);
+%     if(~exist(pcd_fromMatlab_File)) mkdir(pcd_fromMatlab_File); end
+%     if(~exist(pcd_InfiniTAM)) mkdir(pcd_InfiniTAM); end
+%     if(~exist(figFile)) mkdir(figFile); end
     
-%     load('./output/result/nodeGraph_1_50.mat');
+     
     tic;
-    for i = frame_start:frame_end
+    for i = 49%frame_start:frame_end      % i shoule be equal to cnt at the beginning of script
         %======process canonical frame and the second frame(1-2)======
         if cnt == 1
-            D1 = imread(['./input/Wajueji_2/dRecvy_use_new_guide2/d_',int2str(i),'.png']);
-            D2 = imread(['./input/Wajueji_2/dRecvy_use_new_guide2/d_',int2str(i+1),'.png']);
+            D1 = imread(['./input/wajueji/data/png/d_',int2str(i),'.png']);
+            D2 = imread(['./input/wajueji/data/png/d_',int2str(i+1),'.png']);
             pc1 = transformUVD2XYZ(D1, camera_para);
             pc2 = transformUVD2XYZ(D2, camera_para);
             [warped_pc, nodeGraph, DoF_node_relation_map]= process_first_frame(pc1, pc2, para_set, i, cnt, DoF_node_relation_map);
@@ -42,16 +58,15 @@ function main_withNodeExtend
         else %cnt > 1
             %======process two neighboring frame(2-3,3-4,...)======
 %             D2 = imread(['./input/Wajueji_2/extractdata_afterDRev/d_',int2str(i+1),'.png']);
-            D2 = imread(['./input/Wajueji_2/dRecvy_use_new_guide2/d_',int2str(i+1),'.png']);
-            pc1 = pcread(['/home/hhg/Documents/myGithub2/tool/oni2picture_ed2/tankData/MATLAB/node_seg/output/pcd_InfiniTAM/',...
-                'fusioned_pc_',int2str(i),'.pcd']);
+            D2 = imread(['./input/wajueji/data/png/d_',int2str(i+1),'.png']);
+            pc1 = pcread(sprintf('%s/fusioned_pc_%d.pcd',pcd_InfiniTAM,i));
             
             %---------20180306 repalce testFusion as Modified_Infinitam
-            pc1 = pcdownsample(pc1,'gridAverage',3);
+%             pc1 = pcdownsample(pc1,'gridAverage',3);
             %---------
             
             pc2 = transformUVD2XYZ(D2, camera_para);
-            
+             
             pc1 = pcdenoise(pc1);
             pc2 = pcdenoise(pc2);
             [warped_pc, nodeGraph]= process(pc1, pc2, para_set, nodeGraph, i, cnt);
@@ -75,14 +90,13 @@ function main_withNodeExtend
             save(['./output/result/',nodeGraph_name,'.mat'],'nodeGraph','-append');
 
         end
-        pcwrite(warped_pc,...
-                    ['./output/pcd_fromMatlab/warped_pc_',int2str(i),'.pcd'],...
-                    'Encoding','ascii');
+
+        pcwrite(warped_pc,sprintf('%s/warped_pc_%d.pcd',pcd_fromMatlab_File,i),'Encoding','ascii');
         disp(['get warped cloud combining from frame',int2str(frame_start),'to frame',int2str(i+1)]);
         
         %======Modified InfiniTAM======
-        modified_InfiniTAM(i); % get integrated live pointcloud
-%         test_pc_fusion(i, warped_pc, pc2);
+%         modified_InfiniTAM(i); % get integrated live pointcloud
+        test_pc_fusion(i, warped_pc, pc2);
         
         %======redistribute node to each points in integrated pointcloud======
         disp(['The ',int2str(cnt+1),'th frame have been integrated into volume!']);
@@ -95,20 +109,21 @@ end
 
 % Mention:if cnt = 1, we input warped cloud of frame_1 and the 'cnt_th + 1' depth map
 function modified_InfiniTAM(i)
+    global dateTime;
     InfiniTAM_address = '/home/hhg/Documents/myGithub2/InfiniTAM_v2_hhg/InfiniTAM/build/InfiniTAM';
 
 %     arg1 = ' ../Files/wajueji/calib.txt';          %no longer be modified
 %     arg2 = ' ../Files/wajueji/Frames_test/%i.ppm'; %no longer be modified
 %     arg3 = ' ../Files/wajueji/Frames_test/%i.pgm'; %no longer be modified
     arg1 = ' /home/hhg/Documents/myGithub2/InfiniTAM_v2_hhg/InfiniTAM/Files/wajueji/calib.txt';
-    arg2 = [' /home/hhg/Documents/myGithub2/tool/oni2picture_ed2/tankData/MATLAB/node_seg/output/imageSource/dRecvy_use_new_guide2/',...
+    arg2 = [' /home/hhg/Documents/myGithub2/tool/oni2picture_ed2/tankData/MATLAB/node_seg/input/wajueji/data/ppmpgm/c_',...
         int2str(i+1),'.ppm'];                        %no longer be modified
-    arg3 = [' /home/hhg/Documents/myGithub2/tool/oni2picture_ed2/tankData/MATLAB/node_seg/output/imageSource/dRecvy_use_new_guide2/',...
+    arg3 = [' /home/hhg/Documents/myGithub2/tool/oni2picture_ed2/tankData/MATLAB/node_seg/input/wajueji/data/ppmpgm/d_',...
         int2str(i+1),'.pgm'];                        %no longer be modified
     arg4 = ' imu_file_not_exist';                    %no longer be modified
-    arg5 = [' -pcd_file /home/hhg/Documents/myGithub2/tool/oni2picture_ed2/tankData/MATLAB/node_seg/output/pcd_fromMatlab/warped_pc_',...
+    arg5 = [' -pcd_file /home/hhg/Documents/myGithub2/tool/oni2picture_ed2/tankData/MATLAB/node_seg/output/pcd_fromMatlab/',dateTime,'/warped_pc_',...
         int2str(i),'.pcd'];                          %input address, i.e. warped_pc, of InfiniTAM
-    arg6 = [' -output_file_name /home/hhg/Documents/myGithub2/tool/oni2picture_ed2/tankData/MATLAB/node_seg/output/pcd_InfiniTAM/fusioned_pc_',...
+    arg6 = [' -output_file_name /home/hhg/Documents/myGithub2/tool/oni2picture_ed2/tankData/MATLAB/node_seg/output/pcd_InfiniTAM/',dateTime,'/fusioned_pc_',...
         int2str(i+1),'.pcd'];                        %output address of InfiniTAM
     arg7 = sprintf(' -volume_size 3');
     arg8 = sprintf(' -volume_resolution 512');
@@ -134,13 +149,15 @@ end
 
 
 function test_pc_fusion(i, pc1, pc2)
+    global pcd_InfiniTAM;
+    if(mod(i,5)==0) pc1 = pcdownsample(pc1,'gridAverage',1.5); end
+    
     pc2 = pcdownsample(pc2,'gridAverage',3);
     array = [pc1.Location; pc2.Location];
     pc_fusioned = pointCloud(array);
 %     pc_fusioned = pcdownsample(pc_fusioned, 'gridAverage', 3);
 %     pc_fusioned = pcdenoise(pc_fusioned);
-    pcwrite(pc_fusioned, ['/home/hhg/Documents/myGithub2/tool/oni2picture_ed2/tankData/MATLAB/node_seg/output/pcd_InfiniTAM/fusioned_pc_',...
-        int2str(i+1),'.pcd']);
+    pcwrite(pc_fusioned, sprintf('%s/fusioned_pc_%s.pcd',pcd_InfiniTAM,int2str(i+1)));
 end
 
 

@@ -1,4 +1,7 @@
-%% findBestNode:find best connection between pointcloud and node according to result of ICP. 
+%% findBestNode2:find best connection between pointcloud and node according to result of ICP. 
+%   difference between Func 'findBestNode':As for points belonging to more than one node, the best node  
+%                                         for them are their nearest node instead of those have best 
+%                                         transformation.
 %                 It should be mention that each point can match only one node finally.
 
 %               pc1: pointCloud. moving pointcloud in ICP
@@ -8,7 +11,7 @@
 %     outlier_index: array.      n*1. record whether point in pc1 is a outlier or not
 % pc_bestNode_distr: array.      n*1. record which node have best connection with point in pc1
 
-function [outlier_index, pc_bestNode_distr] = findBestNode(pc1, pc2, Tmat, pc_set1_node_index, layers, thres)
+function [outlier_index, pc_bestNode_distr] = findBestNode2(pc1, pc2, Tmat, pc_set1_node_index, layers, thres, node_set)
     if nargin < 4, error('function FINDBESTNODE don''t have enough parameters!');
     elseif nargin < 5, layers = 4;           %mm
     elseif nargin < 6, thres = 1;            %mm
@@ -27,28 +30,30 @@ function [outlier_index, pc_bestNode_distr] = findBestNode(pc1, pc2, Tmat, pc_se
     %%========process point belonging to one node first=========
     
     for i = tt(one_index)'
-       pc_bestNode_distr(i,1) = find(pc_set1_node_index(i,:)); 
-       T = Tmat{layers}{pc_bestNode_distr(i,1)}; 
-       point_afterTran = transformPointsForward(T,pc1.Location(i,:));
-       [~,dist] = findNearestNeighbors(pc2,point_afterTran,1);
+       pc_bestNode_distr(i,1) = find(pc_set1_node_index(i,:));
+       
        %%========judege outlier=========
-       dd(i,2) = dist;
-       if dist > thres, outlier_index(i,2) = 1; end
+%        T = Tmat{layers}{pc_bestNode_distr(i,1)}; 
+%        point_afterTran = transformPointsForward(T,pc1.Location(i,:));
+%        [~,dist] = findNearestNeighbors(pc2,point_afterTran,1);
+%        dd(i,2) = dist;
+%        if dist > thres, outlier_index(i,2) = 1; end
     end
     %%========process point belonging to more than one node first=========
+    node_pc = node_set{1,layers};
     for i = tt(morethanone_index)'
-        mi = inf;               %minimal
-        for n = find(pc_set1_node_index(i,:))
-            T = Tmat{layers}{n};%affine3d
-            point_afterTran = transformPointsForward(T,pc1.Location(i,:)); %1*3
-            [~,dist] = findNearestNeighbors(pc2,point_afterTran,1);        %find point's nearest point in pc2
-            if dist < mi, pc_bestNode_distr(i,1) = n; mi = dist; end
-        end
+        %---find NN
+        pt = pc1.Location(i,:);
+        n = findNearestNeighbors(node_pc,pt,1);
+        pc_bestNode_distr(i,1) = n;
         %%========judege outlier=========
-        dd(i,2) = mi;
-        if mi > thres, outlier_index(i,2) = 1; end
+%         T = Tmat{layers}{n};
+%         point_afterTran = transformPointsForward(T,pc1.Location(i,:)); %1*3
+%         [~,dist] = findNearestNeighbors(pc2,point_afterTran,1);
+%         if dist > thres, outlier_index(i,2) = 1; end
     end
-   
+    
+    
     %%===========visualize relation between inlier rate and thres value==========
     if debug_mode
         count = 1;t_thres = 0:0.1:3; inliner_rate = zeros(1,size(t_thres,2));

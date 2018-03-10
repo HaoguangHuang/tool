@@ -18,6 +18,7 @@ function corrIndex = find_unique_corr(pc_bestNode_distr, pc1, pc2, tmat, thres_c
                                             %eg:hash{3} = [100,35]
                                             %   which means the closest point from pc1 to the 3th point in pc2 now
                                             %   is the 100th point, and their distance is 35mm
+                                     
     for i = p_node(:,1)'
         p1 = pc1.Location(i,:); T1 = tmat{pc_bestNode_distr(i)};
         p1_inPc2 = transformPointsForward(T1, p1);%transform p1 from pc1 coo to pc2 coo
@@ -29,6 +30,7 @@ function corrIndex = find_unique_corr(pc_bestNode_distr, pc1, pc2, tmat, thres_c
            if dist < e, hash{indice} = [i,dist]; continue; end
         end
     end
+
     
     %%======transform corrIndex format to 
     corrIndex = zeros(pc1.Count,3);

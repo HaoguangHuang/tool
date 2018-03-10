@@ -96,7 +96,8 @@ function [warpedPointcloud, nodeGraph]= process(pc1, pc2, para_set, nodeGraph, f
     %% find best connection between node and each point in pointcloud
     thres_outlier = 2;        %mm
     tic;
-    [outlier_index, pc_bestNode_distr] = findBestNode(pc1,pc2,Tmat, pc_set1_node_index, layers, thres_outlier);
+%     [outlier_index, pc_bestNode_distr] = findBestNode(pc1,pc2,Tmat, pc_set1_node_index, layers, thres_outlier);
+    [outlier_index, pc_bestNode_distr] = findBestNode2(pc1,pc2,Tmat,pc_set1_node_index, layers, thres_outlier, node_set_updated);
     fprintf('findBestNode time = %d\n',toc);
     
     tic;
@@ -209,10 +210,13 @@ end
 % node_added_set: pointCloud. Record position of added nodes
 % L: Highest layer
 function node_set_updated = add_new_node_to_highest_layer(node_set_updated, node_added_set, L)
-    pc_array = node_set_updated{L}.Location;
-    n = size(node_added_set.Location,1);
-    pc_array(end+1:end+n,:) = node_added_set.Location;
-    node_set_updated{L} = pointCloud(pc_array);
+    if ~isempty(node_added_set)
+        pc_array = node_set_updated{L}.Location;
+        n = size(node_added_set.Location,1);
+        pc_array(end+1:end+n,:) = node_added_set.Location;
+        node_set_updated{L} = pointCloud(pc_array);
+    end
+    
 end
 
 
@@ -356,7 +360,7 @@ function [Tmat, rmse] = hierarchical_ICP(moving_pc,fixed_pc,layers, node_tree)
                     'InlierRatio',0.75);
                 disp(['--------------now is layer ',int2str(L),' the ',int2str(n),'th node']);
             else % L=2,3,4
-                if moving_pc{L}{n}.Count < 3 || fixed_pc{L}{n}.Count < 3
+                if moving_pc{L}{n}.Count < 100 || fixed_pc{L}{n}.Count < 100
                     Tmat{L}{n} = Tmat{L-1}{node_tree{L}(n)};
                     rmse{L}{n} = inf;
                     disp(['--------------now is layer ',int2str(L),' the ',int2str(n),'th node']);
@@ -370,11 +374,11 @@ function [Tmat, rmse] = hierarchical_ICP(moving_pc,fixed_pc,layers, node_tree)
     end
 end
 
-
+%
 %% createNodeTree:every element in node tree record the connection with the parent node( in upper class)
 function node_tree = createNodeTree(node_set,layers)
     if layers < 2
-        error('need not create node tree');
+        disp('need not create node tree');
     end
     node_tree = cell(1,layers); node_tree{1}{1} = 0;
     for L = 2:layers
@@ -425,7 +429,7 @@ function node_added_set = excludeAddedNodes(node_added_set, pc1, para_set)
         end
     end
     %===距离太近的node合并===
-    if ~isempty(node_added_set)
+    if ~isempty(node_added_set) && ~isempty(node_array)
         node_added_set = pcdownsample(pointCloud(node_array(:,1:3)),'gridAverage',2*r);
         node_added_set = attach_new_node_to_NNP(node_added_set, pc1);
     else

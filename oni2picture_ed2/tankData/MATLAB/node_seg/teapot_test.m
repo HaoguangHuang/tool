@@ -41,7 +41,7 @@ figure(44),imshow(D1,[]),title('projected teapot,zbuffer');
 pc_visible = transformUVD2XYZ(D1,camera_para);
 figure(55),pcshow(pc_visible),title('pc visible,zbuffer');
 
-step = 5;
+step = 15;
 D2 = zbuffer_forward_proj_pointSpliting(teapot_c,camera_para,step);
 figure(45),imshow(D2,[]),title('projected teapot,point spliting');
 pc_pointSpling = transformUVD2XYZ(D2,camera_para);
@@ -50,6 +50,9 @@ figure(56),pcshow(pc_pointSpling),title(sprintf('pc pointsplting,step=%d',step))
 
 % imwrite(uint16(D_output),'./input/teapot/tp.pgm');
 % pcwrite(pointCloud(teapot_c),'./input/teapot/tp.pcd');
+
+D(D>0) = D(D>0) - 200;
+imwrite(uint16(D),'./input/teapot/tp_plus10.pgm');
 
 function D = zbuffer_forward_proj(data,camera_para)
     D = ones(480,640)*inf;

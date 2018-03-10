@@ -118,7 +118,8 @@ function warpedPointcloud = get_warped_pointcloud(pc1, pc2, point_corr, camera_p
 %    warped_pc_use_top_node = warp_use_top_node();
    pc_use_top_node = select(pc1,nonunique_nonproj);
    warped_pc_use_top_node = pctransform(pc_use_top_node,Tmat{1}{1});%error. Node in lowest layer may be more than one
-%    warped_pc_use_top_node = warp_Invisible_Pts(nonunique_nonproj,Tmat,pc_bestNode_distr,pc1);
+   
+%     warped_pc_use_top_node = warp_Invisible_Pts(nonunique_nonproj,Tmat,pc_bestNode_distr,pc1);
    
    
    %%combine all the warped pts
@@ -134,8 +135,15 @@ function warpedPointcloud = get_warped_pointcloud(pc1, pc2, point_corr, camera_p
    tmp = figure(12);
    pcshow(warpedPointcloud);hold on; pcshow(pc2);hold off;
    title(sprintf('warpedPointcloud(R,%d) and pc2(B,%d)',frame_no,frame_no+1));drawnow;
-   name = sprintf('./output/result/figFile/fusioned_warped_pc%d_and_pc%d.fig',frame_no,frame_no+1);
-   saveas(tmp,name);
+   global figFile;
+   
+   
+%    if ~exist(figFile) mkdir(figFile);end
+   
+   if ~mod(frame_no,5) 
+       name = sprintf('%s/fusioned_warped_pc%d_and_pc%d.fig',figFile,frame_no,frame_no+1);
+       saveas(tmp,name); 
+   end%take a large cost of time
    
 end
 
@@ -186,7 +194,7 @@ function [D, idx_map, nonunique_nonproj] = zbuffer_pointSpliting(xyzidx_pc,camer
     D = ones(480,640)*inf;
     nonunique_nonproj = zeros(size(xyzidx_pc,1),1); 
     cnt = 0;%count the nonunique_nonproj points
-    step = 1;
+    step = 2;
     thres = 10;%mm
     for n = 1:size(xyzidx_pc,1)
         x = xyzidx_pc(n,1); y = xyzidx_pc(n,2); z = xyzidx_pc(n,3);
@@ -322,9 +330,10 @@ end
 
 function transformationMap = idx_to_transformation(idx_map, pc_bestNode_distr, Tmat)
     %===先把Tmat{4}转成[α, β，γ，t1,t2,t3]
-    Tmat_6DoF = zeros(size(Tmat{4},2),1);
-    for i = 1:size(Tmat_6DoF)
-        T = Tmat{4}{i}.T';
+    layers = size(Tmat,2);
+    Tmat_6DoF = zeros(size(Tmat{layers},2),1);
+    for i = 1:size(Tmat_6DoF,1)
+        T = Tmat{layers}{i}.T';
         R = T(1:3,1:3); t = T(1:3,4);
         Tmat_6DoF(i,1:3) = rodrigues(R);
         Tmat_6DoF(i,4:6) = t;
